@@ -51,6 +51,7 @@ namespace SistemRentalPS
             try
             {
                 Koneksi();
+                conn.Open();
             }
             
 
