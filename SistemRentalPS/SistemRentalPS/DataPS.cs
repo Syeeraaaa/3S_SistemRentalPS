@@ -401,6 +401,18 @@ namespace SistemRentalPS
 
             dgvGamee.DataSource = dt;
         }
+        private void dgvGamee_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
+
+                cmbPilihUnit.SelectedValue = row.Cells["id_unit"].Value.ToString();
+                txtNamaGame.Text = row.Cells["nama_game"].Value.ToString();
+                cmbGenre.Text = row.Cells["Genre"].Value.ToString();
+            }
+
+        }
     }
 }
 
