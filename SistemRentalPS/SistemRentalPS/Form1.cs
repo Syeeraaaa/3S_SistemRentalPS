@@ -58,6 +58,21 @@ namespace SistemRentalPS
                 cmd.Parameters.AddWithValue("@user", txtUsername.Text);
                 cmd.Parameters.AddWithValue("@pass", txtPass.Text);
 
+                if (txtUsername.Text == "" || txtPass.Text == "")
+                {
+                    MessageBox.Show("Login Gagal!, Password atau Username tidak boleh kosong");
+
+                }
+                else
+                {
+                    MessageBox.Show("Login Berhasil!");
+
+                    Dashboardcs dasboard = new Dashboardcs();
+                    dasboard.Show();
+                    this.Hide();
+                }
+
+
             }
 
 
