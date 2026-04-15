@@ -388,6 +388,19 @@ namespace SistemRentalPS
                 MessageBox.Show("GAGAL MENAAMPILKAAN DATA: " + ex.Message);
             }
         }
+        private void btnTampilkanGame_Click(object sender, EventArgs e)
+        {
+            Koneksi();
+            conn.Open();
+
+            string query = "Select * from Game";
+            SqlDataAdapter da = new SqlDataAdapter(query, conn);
+
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+
+            dgvGamee.DataSource = dt;
+        }
     }
 }
 
