@@ -15,8 +15,16 @@ namespace SistemRentalPS
     {
         SqlConnection conn;
         SqlCommand cmd;
-        
-       
+
+        private void Koneksi()
+        {
+            conn = new SqlConnection(
+             "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True"
+            );
+        }
+
+
+
         public Form1()
         {
             InitializeComponent();
