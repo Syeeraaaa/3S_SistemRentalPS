@@ -183,6 +183,19 @@ namespace SistemRentalPS
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
             }
         }
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
+
+                id_unit = row.Cells[0].Value.ToString();
+                txtNamaUnit.Text = row.Cells[1].Value.ToString();
+                txtTipePS.Text = row.Cells["tipe_ps"].Value.ToString();
+                txtHargaJam.Text = row.Cells["harga_perjam"].Value.ToString();
+                cmbStatus.Text = row.Cells["status"].Value.ToString();
+            }
+        }
     }
 }
 
