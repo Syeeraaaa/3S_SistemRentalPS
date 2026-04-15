@@ -52,8 +52,15 @@ namespace SistemRentalPS
             {
                 Koneksi();
                 conn.Open();
+
+                string query = "select nama_admin from admin where username = @user and password = @pass";
+                cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@user", txtUsername.Text);
+                cmd.Parameters.AddWithValue("@pass", txtPass.Text);
+
             }
-            
+
+
 
         }
     }
