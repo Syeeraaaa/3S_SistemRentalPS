@@ -47,7 +47,17 @@ namespace SistemRentalPS
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
-           
+            try
+            {
+                Koneksi();
+                conn.Close();
+                conn.Close();
+
+                Form1 form1 = new Form1();
+                form1.Show();
+                this.Hide();
+
+            }
         }
     }
 }
