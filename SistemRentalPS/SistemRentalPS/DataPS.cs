@@ -196,6 +196,14 @@ namespace SistemRentalPS
                 cmbStatus.Text = row.Cells["status"].Value.ToString();
             }
         }
+        private void ClearForm()
+        {
+            txtNamaUnit.Clear();
+            txtTipePS.Clear();
+            txtHargaJam.Clear();
+            cmbStatus.SelectedIndex = -1;
+            txtNamaUnit.Focus();
+        }
     }
 }
 
