@@ -32,7 +32,17 @@ namespace SistemRentalPS
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+            try
+            {
+                Koneksi();
+                conn.Open();
+                MessageBox.Show("Koneksi ke database berhasil!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("GAGAL TERKONEKSI KE DATABASE: " + ex.Message);
+            }
+
 
         }
 
