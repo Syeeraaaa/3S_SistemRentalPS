@@ -34,7 +34,10 @@ namespace SistemRentalPS
 
         private void Laporan_Click(object sender, EventArgs e)
         {
-            
+            Laporan laporan = new Laporan();
+            laporan.Show();
+            this.Hide();
+
         }
 
         private void btnTransaksi_Click(object sender, EventArgs e)
