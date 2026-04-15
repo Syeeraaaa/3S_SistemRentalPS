@@ -48,6 +48,10 @@ namespace SistemRentalPS
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
+            try
+            {
+                Koneksi();
+            }
             
 
         }
