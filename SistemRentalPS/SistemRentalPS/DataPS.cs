@@ -204,6 +204,63 @@ namespace SistemRentalPS
             cmbStatus.SelectedIndex = -1;
             txtNamaUnit.Focus();
         }
+
+        private void btnTambahGame_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+                if (txtNamaGame.Text == "")
+                {
+                    MessageBox.Show("Nama Game harus diisi");
+                    txtNamaGame.Focus();
+                    return;
+                }
+                if (cmbPilihUnit.SelectedValue == null)
+                {
+                    MessageBox.Show("Pilih Unit terlebih dahulu!");
+                    cmbPilihUnit.Focus();
+                    return;
+                }
+                if (cmbGenre.Text == "")
+                {
+                    MessageBox.Show("Pilih Genre Game terlebih dahulu!!");
+                    cmbGenre.Focus();
+                    return;
+                }
+
+                string query = @"INSERT INTO Game
+                          (id_unit,nama_game,genre)
+                          VALUES
+                          (@id_unit,@nama_game,@genre)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
+                cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
+                cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data Game berhasil ditambahkan");
+                    ClearForm();
+
+                }
+                else
+                {
+                    MessageBox.Show("Data gagal ditambahkan");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
     }
 }
 
