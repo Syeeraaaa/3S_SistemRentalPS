@@ -31,108 +31,8 @@ namespace SistemRentalPS
             InitializeComponent();
         }
 
-        private void btnUpdate_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
-                if (dgvUnit.CurrentRow == null)
-                {
-                    MessageBox.Show("Klik paada bagian baris yang ingin diupdate!");
-                    return;
-                }
-
-                string query = @"UPDATE UnitPS
-                          SET nama_unit = @nama_unit,
-                              tipe_ps = @tipe_ps,
-                              harga_perjam = @harga_perjam,
-                              status = @status
-                          WHERE id_unit = @id";
-                SqlCommand cmd = new SqlCommand(query, conn);
-
-                cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-                cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
-                cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
-                cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-                cmd.Parameters.AddWithValue("@id", dgvUnit.CurrentRow.Cells[0].Value);
-
-                int result = cmd.ExecuteNonQuery();
-
-                if (result > 0)
-                {
-                    MessageBox.Show("Data Unit PS berhasil diupdate");
-                    ClearForm();
-                    btnTampilkanUnit.PerformClick();
-                }
-                else
-                {
-                    MessageBox.Show("Data gagal diupdate");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
-        }
-        private void btnHapus_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
-
-                DialogResult resultConfirm = MessageBox.Show(
-                    "Apakah anda yakin menghapus data ini?",
-                    "Konfirmasi",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (resultConfirm == DialogResult.Yes)
-                {
-                    string query = "DELETE FROM RentalPS WHERE nama_unit = @nama_unit";
-
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    if (result > 0)
-                    {
-                        MessageBox.Show("Data Unit PS berhasil dihapus");
-                        ClearForm();
-                        btnHapus.PerformClick();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data gagal dihapus");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
-        }
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
-
-                id_unit = row.Cells[0].Value.ToString();
-                txtNamaUnit.Text = row.Cells[1].Value.ToString();
-                txtTipePS.Text = row.Cells["tipe_ps"].Value.ToString();
-                txtHargaJam.Text = row.Cells["harga_perjam"].Value.ToString();
-                cmbStatus.Text = row.Cells["status"].Value.ToString();
-            }
-        }
+      
+        
         private void ClearForm()
         {
             txtNamaUnit.Clear();
@@ -140,148 +40,6 @@ namespace SistemRentalPS
             txtHargaJam.Clear();
             cmbStatus.SelectedIndex = -1;
             txtNamaUnit.Focus();
-        }
-
-        private void btnTambahGame_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
-                if (txtNamaGame.Text == "")
-                {
-                    MessageBox.Show("Nama Game harus diisi");
-                    txtNamaGame.Focus();
-                    return;
-                }
-                if (cmbPilihUnit.SelectedValue == null)
-                {
-                    MessageBox.Show("Pilih Unit terlebih dahulu!");
-                    cmbPilihUnit.Focus();
-                    return;
-                }
-                if (cmbGenre.Text == "")
-                {
-                    MessageBox.Show("Pilih Genre Game terlebih dahulu!!");
-                    cmbGenre.Focus();
-                    return;
-                }
-
-                string query = @"INSERT INTO Game
-                          (id_unit,nama_game,genre)
-                          VALUES
-                          (@id_unit,@nama_game,@genre)";
-                SqlCommand cmd = new SqlCommand(query, conn);
-
-                cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
-                cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
-                cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
-
-                int result = cmd.ExecuteNonQuery();
-
-                if (result > 0)
-                {
-                    MessageBox.Show("Data Game berhasil ditambahkan");
-                    ClearForm();
-
-                }
-                else
-                {
-                    MessageBox.Show("Data gagal ditambahkan");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
-        }
-        private void btnUpdateGame_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
-
-                string query = @"UPDATE Game
-                          SET 
-                              nama_game = @nama_game,
-                              genre = @genre,
-                          WHERE id_unit = @id_unit";
-                SqlCommand cmd = new SqlCommand(query, conn);
-
-                cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
-                cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
-                cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
-
-                int result = cmd.ExecuteNonQuery();
-
-                if (result > 0)
-                {
-                    MessageBox.Show("Data Unit PS berhasil diupdate");
-                    ClearForm();
-                    btnUpdateGame.PerformClick();
-                }
-                else
-                {
-                    MessageBox.Show("Data gagal diupdate");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
-
-        }
-
-
-
-        private void btnHapusGame_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
-
-                DialogResult resultConfirm = MessageBox.Show(
-                    "Apakah anda yakin menghapus data ini?",
-                    "Konfirmasi",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (resultConfirm == DialogResult.Yes)
-                {
-                    string query = "DELETE FROM Game WHERE id_unit = @id_unit";
-
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.Text);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    if (result > 0)
-                    {
-                        MessageBox.Show("Data Unit PS berhasil dihapus");
-                        ClearForm();
-                        btnHapus.PerformClick();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data gagal dihapus");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
         }
 
         private void btnTampilkanUnit_Click(object sender, EventArgs e)
@@ -322,21 +80,8 @@ namespace SistemRentalPS
             }
             catch (Exception ex)
             {
-                MessageBox.Show("GAGAL MENAAMPILKAAN DATA: " + ex.Message);
+                MessageBox.Show("GAGAL MENAMPILKAAN DATA: " + ex.Message);
             }
-        }
-        private void btnTampilkanGame_Click(object sender, EventArgs e)
-        {
-            Koneksi();
-            conn.Open();
-
-            string query = "Select * from Game";
-            SqlDataAdapter da = new SqlDataAdapter(query, conn);
-
-            DataTable dt = new DataTable();
-            da.Fill(dt);
-
-            dgvGamee.DataSource = dt;
         }
         private void dgvGamee_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -350,19 +95,7 @@ namespace SistemRentalPS
             }
 
         }
-        private void dgvUnit_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
-
-
-                txtNamaUnit.Text = row.Cells[1].Value.ToString();
-                txtTipePS.Text = row.Cells[2].Value.ToString();
-                txtHargaJam.Text = row.Cells[3].Value.ToString();
-                cmbStatus.Text = row.Cells[4].Value.ToString();
-            }
-        }
+       
 
         private void btnTambah_Click_1(object sender, EventArgs e)
         {
@@ -427,6 +160,283 @@ namespace SistemRentalPS
             {
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
             }
+        }
+
+        private void txtNamaUnit_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtTipePS_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnUpdate_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+                if (dgvUnit.CurrentRow == null)
+                {
+                    MessageBox.Show("Klik paada bagian baris yang ingin diupdate!");
+                    return;
+                }
+
+                string query = @"UPDATE UnitPS
+                          SET nama_unit = @nama_unit,
+                              tipe_ps = @tipe_ps,
+                              harga_perjam = @harga_perjam,
+                              status = @status
+                          WHERE id_unit = @id";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+                cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
+                cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
+                cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
+                cmd.Parameters.AddWithValue("@id", dgvUnit.CurrentRow.Cells[0].Value);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data Unit PS berhasil diupdate");
+                    ClearForm();
+                    btnTampilkanUnit.PerformClick();
+                }
+                else
+                {
+                    MessageBox.Show("Data gagal diupdate");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
+        private void btnHapus_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+
+                DialogResult resultConfirm = MessageBox.Show(
+                    "Apakah anda yakin menghapus data ini?",
+                    "Konfirmasi",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (resultConfirm == DialogResult.Yes)
+                {
+                    string query = "DELETE FROM RentalPS WHERE nama_unit = @nama_unit";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+
+                    int result = cmd.ExecuteNonQuery();
+
+                    if (result > 0)
+                    {
+                        MessageBox.Show("Data Unit PS berhasil dihapus");
+                        ClearForm();
+                        btnHapus.PerformClick();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Data gagal dihapus");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
+        private void btnTambahGame_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+                if (txtNamaGame.Text == "")
+                {
+                    MessageBox.Show("Nama Game harus diisi");
+                    txtNamaGame.Focus();
+                    return;
+                }
+                if (cmbPilihUnit.SelectedValue == null)
+                {
+                    MessageBox.Show("Pilih Unit terlebih dahulu!");
+                    cmbPilihUnit.Focus();
+                    return;
+                }
+                if (cmbGenre.Text == "")
+                {
+                    MessageBox.Show("Pilih Genre Game terlebih dahulu!!");
+                    cmbGenre.Focus();
+                    return;
+                }
+
+                string query = @"INSERT INTO Game
+                          (id_unit,nama_game,genre)
+                          VALUES
+                          (@id_unit,@nama_game,@genre)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
+                cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
+                cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data Game berhasil ditambahkan");
+                    ClearForm();
+
+                }
+                else
+                {
+                    MessageBox.Show("Data gagal ditambahkan");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
+        private void btnUpdateGame_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+
+                string query = @"UPDATE Game
+                          SET 
+                              nama_game = @nama_game,
+                              genre = @genre,
+                          WHERE id_unit = @id_unit";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
+                cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
+                cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data Unit PS berhasil diupdate");
+                    ClearForm();
+                    btnUpdateGame.PerformClick();
+                }
+                else
+                {
+                    MessageBox.Show("Data gagal diupdate");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
+        private void btnHapusGame_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+
+                DialogResult resultConfirm = MessageBox.Show(
+                    "Apakah anda yakin menghapus data ini?",
+                    "Konfirmasi",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (resultConfirm == DialogResult.Yes)
+                {
+                    string query = "DELETE FROM Game WHERE id_unit = @id_unit";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.Text);
+
+                    int result = cmd.ExecuteNonQuery();
+
+                    if (result > 0)
+                    {
+                        MessageBox.Show("Data Unit PS berhasil dihapus");
+                        ClearForm();
+                        btnHapus.PerformClick();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Data gagal dihapus");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
+
+        private void btnTampilGame_Click(object sender, EventArgs e)
+        {
+            Koneksi();
+            conn.Open();
+
+            string query = "Select * from Game";
+            SqlDataAdapter da = new SqlDataAdapter(query, conn);
+
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+
+            dgvGamee.DataSource = dt;
+        }
+
+        private void dgvUnit_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
+
+                id_unit = row.Cells[0].Value.ToString();    
+                txtNamaUnit.Text = row.Cells[1].Value.ToString();
+                txtTipePS.Text = row.Cells["tipe_ps"].Value.ToString();
+                txtHargaJam.Text = row.Cells["harga_perjam"].Value.ToString();
+                cmbStatus.Text = row.Cells["status"].Value.ToString();
+            }
+        
+        }
+
+        private void dashboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Dashboardcs dasboard = new Dashboardcs();
+            dasboard.Show();
+            this.Hide();
         }
     }
 }
