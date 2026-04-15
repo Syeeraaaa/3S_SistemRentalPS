@@ -261,6 +261,46 @@ namespace SistemRentalPS
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
             }
         }
+        private void btnUpdateGame_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+
+                string query = @"UPDATE Game
+                          SET 
+                              nama_game = @nama_game,
+                              genre = @genre,
+                          WHERE id_unit = @id_unit";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
+                cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
+                cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
+
+                int result = cmd.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    MessageBox.Show("Data Unit PS berhasil diupdate");
+                    ClearForm();
+                    btnUpdateGame.PerformClick();
+                }
+                else
+                {
+                    MessageBox.Show("Data gagal diupdate");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+
+        }
     }
 }
 
