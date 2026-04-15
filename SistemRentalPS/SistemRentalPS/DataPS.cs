@@ -413,6 +413,19 @@ namespace SistemRentalPS
             }
 
         }
+        private void dgvUnit_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
+
+
+                txtNamaUnit.Text = row.Cells[1].Value.ToString();
+                txtTipePS.Text = row.Cells[2].Value.ToString();
+                txtHargaJam.Text = row.Cells[3].Value.ToString();
+                cmbStatus.Text = row.Cells[4].Value.ToString();
+            }
+        }
     }
 }
 
