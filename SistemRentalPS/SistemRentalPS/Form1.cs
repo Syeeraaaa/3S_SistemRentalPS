@@ -71,8 +71,9 @@ namespace SistemRentalPS
                     dasboard.Show();
                     this.Hide();
                 }
-
-
+            }catch (Exception ex)
+            {
+                MessageBox.Show("Login Gagal!, " + ex.Message);
             }
 
 
