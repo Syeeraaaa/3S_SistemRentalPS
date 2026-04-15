@@ -141,6 +141,48 @@ namespace SistemRentalPS
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
             }
         }
+        private void btnHapus_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+
+                DialogResult resultConfirm = MessageBox.Show(
+                    "Apakah anda yakin menghapus data ini?",
+                    "Konfirmasi",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (resultConfirm == DialogResult.Yes)
+                {
+                    string query = "DELETE FROM RentalPS WHERE nama_unit = @nama_unit";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+
+                    int result = cmd.ExecuteNonQuery();
+
+                    if (result > 0)
+                    {
+                        MessageBox.Show("Data Unit PS berhasil dihapus");
+                        ClearForm();
+                        btnHapus.PerformClick();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Data gagal dihapus");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
+        }
     }
 }
 
