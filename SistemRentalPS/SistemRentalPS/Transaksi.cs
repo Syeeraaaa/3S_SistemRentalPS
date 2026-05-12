@@ -339,5 +339,49 @@ namespace SistemRentalPS
                 MessageBox.Show("Error: " + ex.Message);
             }
         }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                string query = @"SELECT 
+                                    t.id_transaksi,
+                                    p.nama_pelanggan AS 'Nama Pelanggan',
+                                    p.no_hp AS 'No HP',
+                                    u.nama_unit AS 'Unit',
+                                    t.jam_mulai AS 'Jam Mulai',
+                                    t.jam_selesai AS 'Jam Selesai',
+                                    t.total_bayar AS 'Total Bayar'
+                                FROM Transaksi t
+                                JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
+                                JOIN UnitPS u ON t.id_unit = u.id_unit
+                                WHERE p.nama_pelanggan LIKE '%' + @search + '%'
+                                ORDER BY t.id_transaksi DESC";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@search", txtSearch.Text);
+
+                SqlDataAdapter searchAdapter = new SqlDataAdapter(cmd);
+                DataTable searchDt = new DataTable();
+                searchAdapter.Fill(searchDt);
+
+                bindingSource1.DataSource = searchDt;
+                dgvTransaksi.DataSource = bindingSource1;
+
+                if (dgvTransaksi.Columns["id_transaksi"] != null)
+                {
+                    dgvTransaksi.Columns["id_transaksi"].Visible = false;
+                }
+
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error Search: " + ex.Message);
+            }
+        }
     }
 }
