@@ -569,6 +569,19 @@ namespace SistemRentalPS
                 MessageBox.Show("Gagal load data: " + ex.Message);
             }
         }
+
+        private void BindControls()
+        {
+            txtNamaUnit.DataBindings.Clear();
+            txtTipePS.DataBindings.Clear();
+            txtHargaJam.DataBindings.Clear();
+            cmbStatus.DataBindings.Clear();
+
+            txtNamaUnit.DataBindings.Add("Text", bindingSource, "nama_unit");
+            txtTipePS.DataBindings.Add("Text", bindingSource, "tipe_ps");
+            txtHargaJam.DataBindings.Add("Text", bindingSource, "harga_perjam");
+            cmbStatus.DataBindings.Add("Text", bindingSource, "status");
+        }
     }
 }
 
