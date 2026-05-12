@@ -13,12 +13,16 @@ namespace SistemRentalPS
         SqlCommand cmd;
         SqlDataReader reader;
 
+        string selectedId = "";
+
         string connString = "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True";
 
         public Transaksi()
         {
             InitializeComponent();
             conn = new SqlConnection(connString);
+
+            this.dgvTransaksi.CellClick += new DataGridViewCellEventHandler(this.dgvTransaksi_CellContentClick);
         }
 
         private void LoadData()
@@ -28,25 +32,19 @@ namespace SistemRentalPS
                 if (conn.State == ConnectionState.Closed)
                     conn.Open();
 
-                dgvTransaksi.Rows.Clear();
-                dgvTransaksi.Columns.Clear();
-                dgvTransaksi.Columns.Add("nama", "Nama Pelanggan");
-                dgvTransaksi.Columns.Add("no_hp", "No HP");
-                dgvTransaksi.Columns.Add("unit", "Unit");
-                dgvTransaksi.Columns.Add("jam_mulai", "Jam Mulai");
-                dgvTransaksi.Columns.Add("jam_selesai", "Jam Selesai");
-                dgvTransaksi.Columns.Add("total_bayar", "Total Bayar");
+                dgvTransaksi.Rows.Clear(); 
 
                 string query = @"SELECT 
+                    t.id_transaksi,
                     p.nama_pelanggan AS nama,
                     p.no_hp AS no_hp,
                     u.nama_unit AS unit,
                     t.jam_mulai,
                     t.jam_selesai,
                     t.total_bayar
-                 FROM Transaksi t
-                 JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
-                 JOIN UnitPS u ON t.id_unit = u.id_unit";
+                FROM Transaksi t
+                JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
+                JOIN UnitPS u ON t.id_unit = u.id_unit";
 
                 cmd = new SqlCommand(query, conn);
                 reader = cmd.ExecuteReader();
@@ -54,6 +52,7 @@ namespace SistemRentalPS
                 while (reader.Read())
                 {
                     dgvTransaksi.Rows.Add(
+                        reader["id_transaksi"].ToString(),
                         reader["nama"].ToString(),
                         reader["no_hp"].ToString(),
                         reader["unit"].ToString(),
@@ -62,6 +61,7 @@ namespace SistemRentalPS
                         reader["total_bayar"].ToString()
                     );
                 }
+
                 reader.Close();
                 conn.Close();
             }
@@ -117,17 +117,13 @@ namespace SistemRentalPS
 
         private void Transaksi_Load(object sender, EventArgs e)
         {
-            dtpTanggal.Value = DateTime.Now;
-            dtpTanggal.MinDate = DateTime.Now;
-            dtpTanggal.MaxDate = DateTime.Now;
+            dtMulai.Format = DateTimePickerFormat.Custom;
+            dtMulai.CustomFormat = "dd/MM/yyyy HH:mm";
+            dtMulai.ShowUpDown = false;
 
-            dtMulai.Format = DateTimePickerFormat.Time;
-            dtMulai.ShowUpDown = true;
-            dtMulai.Value = DateTime.Now;
-
-            dtSelesai.Format = DateTimePickerFormat.Time;
-            dtSelesai.ShowUpDown = true;
-            dtSelesai.Value = DateTime.Now.AddHours(1);
+            dtSelesai.Format = DateTimePickerFormat.Custom;
+            dtSelesai.CustomFormat = "dd/MM/yyyy HH:mm";
+            dtSelesai.ShowUpDown = false;
 
             cmbUnit.Items.Clear();
             cmbUnit.Items.Add("PS3");
@@ -141,6 +137,15 @@ namespace SistemRentalPS
             dgvTransaksi.ReadOnly = true;
             dgvTransaksi.AllowUserToAddRows = false;
             dgvTransaksi.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dgvTransaksi.Columns.Add("id_transaksi", "ID");
+            dgvTransaksi.Columns["id_transaksi"].Visible = false;
+            dgvTransaksi.Columns.Add("nama", "Nama Pelanggan");
+            dgvTransaksi.Columns.Add("no_hp", "No HP");
+            dgvTransaksi.Columns.Add("unit", "Unit");
+            dgvTransaksi.Columns.Add("jam_mulai", "Jam Mulai");
+            dgvTransaksi.Columns.Add("jam_selesai", "Jam Selesai");
+            dgvTransaksi.Columns.Add("total_bayar", "Total Bayar");
 
             LoadData();
         }
@@ -251,24 +256,21 @@ namespace SistemRentalPS
             {
                 int i = e.RowIndex;
 
-                txtNama.Text = dgvTransaksi.Rows[i].Cells[0].Value.ToString();
-                txtNoHP.Text = dgvTransaksi.Rows[i].Cells[1].Value.ToString();
-                cmbUnit.Text = dgvTransaksi.Rows[i].Cells[2].Value.ToString();
-                //cmbStatus.Text = dgvTransaksi.Rows[i].Cells[3].Value.ToString();
+                selectedId = dgvTransaksi.Rows[i].Cells[0].Value.ToString();
 
 
-                dtMulai.Value = DateTime.Parse(dgvTransaksi.Rows[i].Cells[3].Value.ToString());
-                dtSelesai.Value = DateTime.Parse(dgvTransaksi.Rows[i].Cells[4].Value.ToString());
-                txtTotal.Text = dgvTransaksi.Rows[i].Cells[5].Value.ToString();
+                MessageBox.Show("ID keambil: " + selectedId);
+
+                txtNama.Text = dgvTransaksi.Rows[i].Cells[1].Value.ToString();
+                txtNoHP.Text = dgvTransaksi.Rows[i].Cells[2].Value.ToString();
+                cmbUnit.Text = dgvTransaksi.Rows[i].Cells[3].Value.ToString();
+                dtMulai.Value = DateTime.Parse(dgvTransaksi.Rows[i].Cells[4].Value.ToString());
+                dtSelesai.Value = DateTime.Parse(dgvTransaksi.Rows[i].Cells[5].Value.ToString());
+                txtTotal.Text = dgvTransaksi.Rows[i].Cells[6].Value.ToString();
             }
         }
 
         private void dtMulai_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void dtpTanggal_ValueChanged(object sender, EventArgs e)
         {
 
         }
@@ -286,6 +288,67 @@ namespace SistemRentalPS
         private void txtNoHP_KeyPress(object sender, KeyPressEventArgs e)
         {
             
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (selectedId == "")
+                {
+                    MessageBox.Show("Pilih data dulu!");
+                    return;
+                }
+
+
+                TimeSpan durasi = dtSelesai.Value - dtMulai.Value;
+                int jam = (int)durasi.TotalHours;
+                if (jam <= 0) jam = 1;
+
+                int tarifPerJam = 10000;
+                int total = jam * tarifPerJam;
+                txtTotal.Text = total.ToString();
+
+                conn.Open();
+
+
+                string queryP = @"UPDATE Pelanggan 
+                          SET nama_pelanggan=@nama, no_hp=@nohp 
+                          WHERE id_pelanggan = (SELECT id_pelanggan FROM Transaksi WHERE id_transaksi=@id)";
+                SqlCommand cmdP = new SqlCommand(queryP, conn);
+                cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
+                cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
+                cmdP.Parameters.AddWithValue("@id", selectedId);
+                cmdP.ExecuteNonQuery();
+
+
+                int id_unit = 1;
+                if (cmbUnit.Text == "PS3") id_unit = 1;
+                else if (cmbUnit.Text == "PS4") id_unit = 2;
+                else if (cmbUnit.Text == "PS5") id_unit = 3;
+
+
+                string queryT = @"UPDATE Transaksi 
+                          SET id_unit=@unit, jam_mulai=@mulai, jam_selesai=@selesai, total_bayar=@total 
+                          WHERE id_transaksi=@id";
+                SqlCommand cmdT = new SqlCommand(queryT, conn);
+                cmdT.Parameters.AddWithValue("@unit", id_unit);
+                cmdT.Parameters.AddWithValue("@mulai", dtMulai.Value);
+                cmdT.Parameters.AddWithValue("@selesai", dtSelesai.Value);
+                cmdT.Parameters.AddWithValue("@total", total);
+                cmdT.Parameters.AddWithValue("@id", selectedId);
+
+                int result = cmdT.ExecuteNonQuery();
+                MessageBox.Show("Row terupdate: " + result);
+                MessageBox.Show("Data berhasil diupdate!");
+
+                conn.Close();
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+            }
         }
     }
 }
