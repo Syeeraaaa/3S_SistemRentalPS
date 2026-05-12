@@ -582,6 +582,43 @@ namespace SistemRentalPS
             txtHargaJam.DataBindings.Add("Text", bindingSource, "harga_perjam");
             cmbStatus.DataBindings.Add("Text", bindingSource, "status");
         }
+
+        private void btnResetData_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (SqlConnection conn = Koneksi())
+                {
+                    conn.Open();
+
+                    string query = @"
+                        IF OBJECT_ID('dbo.UnitPS_Backup') IS NOT NULL
+                        BEGIN
+                            DELETE FROM dbo.Transaksi;
+                            DELETE FROM dbo.Game;
+                            DELETE FROM dbo.UnitPS
+
+                            INSERT INTO dbo.UnitPS
+                            (nama_unit, tipe_ps, harga_perjam, status)
+                            
+                            SELECT
+                            nama_unit, tipe_ps, harga_perjam, status
+                            FROM dbo.UnitPS_Backup;
+                        END";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                MessageBox.Show("Data berhasil direset");
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Reset gagal: " + ex.Message);
+            }
+        }
     }
 }
 
