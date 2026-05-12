@@ -52,17 +52,7 @@ namespace SistemRentalPS
                 dataGridView1.Columns.Add("Selesai", "Selesai");
                 dataGridView1.Columns.Add("Total", "Total");
 
-                string query = @"SELECT 
-                                p.nama_pelanggan,
-                                u.nama_unit,
-                                t.tanggal,
-                                t.jam_mulai,
-                                t.jam_selesai,
-                                t.total_bayar
-                                FROM Transaksi t
-                                JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
-                                JOIN UnitPS u ON t.id_unit = u.id_unit
-                                WHERE t.tanggal BETWEEN @tglMulai AND @tglSampai";
+                string query = "SELECT * from vmLaporan WHERE tanggal BETWEEN @tglMulai AND @tglSampai";
 
                 cmd = new SqlCommand(query, conn);
 
@@ -78,15 +68,18 @@ namespace SistemRentalPS
                         Convert.ToDateTime(reader["tanggal"]).ToShortDateString(),
                     reader["jam_mulai"].ToString(),
                     reader["jam_selesai"].ToString(),
-                    reader["total_bayar"].ToString()
+                    //reader["total_bayar"].ToString()
+                    Convert.ToDecimal(reader["total_bayar"]).ToString("N0")
                     );
                 }
 
                 reader.Close();
-                string queryTotal = "SELECT SUM(total_bayar) FROM cTransaksi WHERE tanggal BETWEEN @tglMulai AND @tglSampai";
+                
+                string queryTotal = "SELECT SUM(total_bayar) FROM Transaksi WHERE tanggal BETWEEN @tglMulai AND @tglSampai";
                 SqlCommand cmdTotal = new SqlCommand(queryTotal, conn);
                 cmdTotal.Parameters.AddWithValue("@tglMulai", dtmDari.Value.Date);
                 cmdTotal.Parameters.AddWithValue("@tglSampai", dtmSampai.Value.Date);
+                TotalPendapatan();
             }
             catch (Exception ex)
             {
@@ -97,21 +90,40 @@ namespace SistemRentalPS
 
         private void label4_Click(object sender, EventArgs e)
         {
-            //try
-            //{
-                //Koneksi();
+            try
+            {
+                Koneksi();
                 //conn.Open();
+                using (SqlCommand cmd = new SqlCommand("sp_TotalPendapatan", conn))
+                {
+                    cmd.Parameters.AddWithValue("@tglMulai", dtmDari.Value.Date);
+                    cmd.Parameters.AddWithValue("@tglSampai", dtmSampai.Value.Date);
+                    cmd.CommandType = CommandType.StoredProcedure;
 
+                    SqlParameter outputPram = new SqlParameter("@Total", SqlDbType.Int);
+                    outputPram.Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add(outputPram);
+                    conn.Open();
+                    //if (conn.State == ConnectionState.Closed) conn.Open();
+                    cmd.ExecuteNonQuery();
+
+                    label4.Text = "Total Pendapatan: " + outputPram.Value.ToString();
+                }
+            
                 //string query = "SELECT SUM(total_bayar) FROM Transaksi";
                 //cmd = new SqlCommand(query, conn);
                 //int jumlah = (int)cmd.ExecuteScalar();
                 //label4.Text = jumlah.ToString();
                 //conn.Close();
-            //}
+            
             //catch (Exception ex)
             //{
               //  MessageBox.Show(ex.Message);
-            //}
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menghitung total: " + ex.Message);
+            }
         }
 
         
@@ -126,11 +138,13 @@ namespace SistemRentalPS
                     using (SqlCommand cmd = new SqlCommand("sp_TotalPendapatan", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-
+                    cmd.Parameters.AddWithValue("@tglMulai", dtmDari.Value.Date);
+                    cmd.Parameters.AddWithValue("@tglSampai", dtmSampai.Value.Date);
                         SqlParameter outputParam = new SqlParameter("@Total", SqlDbType.Int);
                         outputParam.Direction = ParameterDirection.Output;
                         cmd.Parameters.Add(outputParam);
 
+                        if (conn.State == ConnectionState.Closed)
                         conn.Open();
                         cmd.ExecuteNonQuery();
                         label4.Text = "Total Pendapatan:Rp. " + outputParam.Value.ToString();
@@ -161,6 +175,8 @@ namespace SistemRentalPS
 
         }
 
+        
+
         private void button1_Click(object sender, EventArgs e)
         {
         
@@ -172,33 +188,40 @@ namespace SistemRentalPS
                     conn.Open();
                 }
 
-                string query = @"SELECT 
-                            t.id_transaksi,
-                            p.nama_pelanggan,
-                            u.nama_unit,
-                            t.tanggal,
-                            t.jam_mulai,
-                            t.jam_selesai,
-                            t.total_bayar
-                        FROM Transaksi t
-                        JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
-                        JOIN UnitPS u ON t.id_unit = u.id_unit
-                        WHERE p.nama_pelanggan LIKE '%' + @search + '%'
-                           OR u.nama_unit LIKE '%' + @search + '%'";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@search", txtCari.Text);
-
-                SqlDataReader reader = cmd.ExecuteReader();
-                DataTable dt = new DataTable();
-                dt.Load(reader);
-                dataGridView1.DataSource = dt;
-
-                reader.Close();
-
-                if (dt.Rows.Count == 0)
+                
+                dataGridView1.DataSource = null;
+                dataGridView1.Columns.Clear();
+                TotalPendapatan();
+                string query = "SELECT * FROM vmLaporan WHERE nama_pelanggan LIKE @nama";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    MessageBox.Show("Data tidak ditemukan!");
+                    //SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@nama", "%" + txtCari.Text + "%");
+
+                    //SqlDataReader reader = cmd.ExecuteReader();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    //dt.Load(reader);
+                    da.Fill(dt);
+                    dataGridView1.DataSource = dt;
+
+                    dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                    //reader.Close();
+
+                    if (dt.Rows.Count > 0)
+                    {
+                        //MessageBox.Show("Data tidak ditemukan!");
+                        dataGridView1.Columns["nama_pelanggan"].HeaderText = "Nama Pelanggan";
+                        dataGridView1.Columns["nama_unit"].HeaderText = "Unit";
+                        dataGridView1.Columns["tanggal"].HeaderText = "Tanggal";
+                        dataGridView1.Columns["jam_mulai"].HeaderText = "Mulai";
+                        dataGridView1.Columns["jam_selesai"].HeaderText = "Selesai";
+                        dataGridView1.Columns["total_bayar"].HeaderText = "Total";
+                    }
+                    else
+                    {
+                        MessageBox.Show("Data '" + txtCari.Text + "' tidak ditemuka!");
+                    }
                 }
             }
             catch (Exception ex)
