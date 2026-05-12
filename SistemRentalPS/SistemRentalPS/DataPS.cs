@@ -542,6 +542,33 @@ namespace SistemRentalPS
 
             }
         }
+
+        private void LoadData()
+        {
+            try
+            {
+                using (SqlConnection conn = Koneksi())
+                {
+                    conn.Open();
+                    string query = "SELECT * FROM vwUnitPS";
+                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    {
+                        dt = new DataTable();
+                        da.Fill(dt);
+
+                        bindingSource.DataSource = dt;
+                        dgvUnit.DataSource = bindingSource;
+                        dgvUnit.Columns["id_unit"].Visible = false;
+
+                        BindControls();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal load data: " + ex.Message);
+            }
+        }
     }
 }
 
