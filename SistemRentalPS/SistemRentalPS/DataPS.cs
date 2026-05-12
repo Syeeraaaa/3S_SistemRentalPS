@@ -137,17 +137,17 @@ namespace SistemRentalPS
                     }
 
                     string query = @"INSERT INTO UnitPS
-                          ( nama_unit,tipe_ps,harga_perjam,status)
-                          VALUES
-                          ( @nama_unit,@tipe_ps,@harga_perjam,@status)";
-                    SqlCommand cmd = new SqlCommand(query, conn);
-
-                    //cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.Text);
-                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-                    cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
-                    cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
-                    cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-
+                         (nama_unit,tipe_ps,harga_perjam,status)
+                         VALUES
+                         (@nama_unit,@tipe_ps,@harga_perjam,@status)";
+                    using (SqlCommand cmd = new SqlCommand("sp_InsertUnitPS", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+                        cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
+                        cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
+                        cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
+                    }
                     int result = cmd.ExecuteNonQuery();
 
                     if (result > 0)
