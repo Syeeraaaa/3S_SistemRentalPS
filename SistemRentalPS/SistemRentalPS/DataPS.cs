@@ -117,19 +117,13 @@ namespace SistemRentalPS
                         txtNamaUnit.Focus();
                         return;
                     }
-                    if (txtNamaUnit.Text == "")
-                    {
-                        MessageBox.Show("Nama Unit harus diisi");
-                        txtNamaUnit.Focus();
-                        return;
-                    }
                     if (txtTipePS.Text == "")
                     {
                         MessageBox.Show("Tipe PS harus diisi");
                         txtTipePS.Focus();
                         return;
                     }
-                    if (txtHargaJam.Text == "" || txtHargaJam.Text.Any(char.IsLetter))
+                    if (txtHargaJam.Text == "")
                     {
                         MessageBox.Show("Harga/Jam harus diisi");
                         txtHargaJam.Focus();
