@@ -44,47 +44,12 @@ namespace SistemRentalPS
             cmbStatus.SelectedIndex = -1;
             txtNamaUnit.Focus();
         }
-
+        // ------------------------
+        // BTN TAMPILKAN DI UNIT
+        // ------------------------
         private void btnTampilkanUnit_Click(object sender, EventArgs e)
         {
-            try
-            {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
-
-                dgvUnit.Rows.Clear();
-                dgvUnit.Columns.Clear();
-
-                dgvUnit.Columns.Add("id_unit", "No");
-                dgvUnit.Columns.Add("nama_unit", "Nama Unit");
-                dgvUnit.Columns.Add("tipe_ps", "Tipe PS");
-                dgvUnit.Columns.Add("harga_perjam", "Harga perjam");
-                dgvUnit.Columns.Add("status", "Status");
-
-                string query = "Select * from UnitPS";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                SqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    dgvUnit.Rows.Add(
-                        reader["id_unit"].ToString(),
-                        reader["nama_unit"].ToString(),
-                        reader["tipe_ps"].ToString(),
-                        reader["harga_perjam"].ToString(),
-                        reader["status"].ToString()
-                        );
-                }
-                reader.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("GAGAL MENAMPILKAAN DATA: " + ex.Message);
-            }
+            LoadData();
         }
         private void dgvGamee_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
