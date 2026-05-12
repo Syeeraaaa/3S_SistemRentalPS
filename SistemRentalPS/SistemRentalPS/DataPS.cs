@@ -189,13 +189,11 @@ namespace SistemRentalPS
                 {
 
                     Koneksi();
-                    if (conn.State == System.Data.ConnectionState.Closed)
-                    {
+                    
                         conn.Open();
-                    }
-                    if (dgvUnit.CurrentRow == null)
+                    if (string.IsNullOrEmpty(id_unit))
                     {
-                        MessageBox.Show("Klik paada bagian baris yang ingin diupdate!");
+                        MessageBox.Show("Klik pada bagian baris yang ingin diupdate!");
                         return;
                     }
 
