@@ -265,6 +265,8 @@ namespace SistemRentalPS
                         cmdGame.Parameters.AddWithValue("@id_unit", id_unit);
                         cmdGame.ExecuteNonQuery();
 
+                        string query = "DELETE FROM UnitPS WHERE id_unit = @id_unit";
+
                         if (result > 0)
                         {
                             MessageBox.Show("Data Unit PS berhasil dihapus");
