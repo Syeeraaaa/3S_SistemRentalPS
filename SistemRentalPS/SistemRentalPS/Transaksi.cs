@@ -12,6 +12,8 @@ namespace SistemRentalPS
         SqlConnection conn;
         SqlCommand cmd;
         SqlDataReader reader;
+        SqlDataAdapter adapter;
+        DataTable dt;
 
         string selectedId = "";
 
@@ -46,24 +48,12 @@ namespace SistemRentalPS
                 JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
                 JOIN UnitPS u ON t.id_unit = u.id_unit";
 
-                cmd = new SqlCommand(query, conn);
-                reader = cmd.ExecuteReader();
+                adapter = new SqlDataAdapter(query, conn);
+                dt = new DataTable();
+                adapter.Fill(dt);
 
-                while (reader.Read())
-                {
-                    dgvTransaksi.Rows.Add(
-                        reader["id_transaksi"].ToString(),
-                        reader["nama"].ToString(),
-                        reader["no_hp"].ToString(),
-                        reader["unit"].ToString(),
-                        reader["jam_mulai"].ToString(),
-                        reader["jam_selesai"].ToString(),
-                        reader["total_bayar"].ToString()
-                    );
-                }
 
-                reader.Close();
-                conn.Close();
+
             }
             catch (Exception ex)
             {
