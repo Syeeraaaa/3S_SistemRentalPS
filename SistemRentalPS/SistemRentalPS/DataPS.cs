@@ -19,6 +19,8 @@ namespace SistemRentalPS
         SqlCommand cmd;
         SqlDataReader reader;
         string id_unit;
+        string id_game;
+        SqlDataAdapter da;
 
         private void Koneksi()
         {
