@@ -228,8 +228,16 @@ namespace SistemRentalPS
                     cmdT.ExecuteNonQuery();
                 }
 
+                MessageBox.Show("Data berhasil disimpan!");
+                conn.Close();
 
-                    LoadData();
+                txtNama.Text = "";
+                txtNoHP.Text = "";
+                txtTotal.Text = "";
+                cmbUnit.SelectedIndex = -1;
+
+
+                LoadData();
             }
             catch (Exception ex)
             {
