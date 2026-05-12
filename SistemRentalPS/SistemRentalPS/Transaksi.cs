@@ -115,7 +115,7 @@ namespace SistemRentalPS
             int total = jam * tarifPerJam;
 
             txtTotal.Text = total.ToString();
-            MessageBox.Show("Transaksi dimulai. Durasi: " + jam + " jam");
+            MessageBox.Show("Durasi: " + jam + " jam, Total: Rp " + total);
         }
 
         private void Transaksi_Load(object sender, EventArgs e)
@@ -291,54 +291,48 @@ namespace SistemRentalPS
             {
                 if (selectedId == "")
                 {
-                    MessageBox.Show("Pilih data dulu!");
+                    MessageBox.Show("Pilih data yang akan diupdate!");
                     return;
                 }
 
 
-                TimeSpan durasi = dtSelesai.Value - dtMulai.Value;
-                int jam = (int)durasi.TotalHours;
-                if (jam <= 0) jam = 1;
-
-                int tarifPerJam = 10000;
-                int total = jam * tarifPerJam;
-                txtTotal.Text = total.ToString();
-
-                conn.Open();
-
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
 
                 string queryP = @"UPDATE Pelanggan 
-                          SET nama_pelanggan=@nama, no_hp=@nohp 
-                          WHERE id_pelanggan = (SELECT id_pelanggan FROM Transaksi WHERE id_transaksi=@id)";
+                          SET nama_pelanggan = @nama, no_hp = @nohp 
+                          WHERE id_pelanggan = (SELECT id_pelanggan FROM Transaksi WHERE id_transaksi = @id)";
                 SqlCommand cmdP = new SqlCommand(queryP, conn);
                 cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
                 cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
                 cmdP.Parameters.AddWithValue("@id", selectedId);
                 cmdP.ExecuteNonQuery();
 
-
                 int id_unit = 1;
                 if (cmbUnit.Text == "PS3") id_unit = 1;
                 else if (cmbUnit.Text == "PS4") id_unit = 2;
                 else if (cmbUnit.Text == "PS5") id_unit = 3;
 
+                using (SqlCommand cmdT = new SqlCommand("UPDATE Transaksi SET id_unit = @id_unit, jam_mulai = @jam_mulai, jam_selesai = @jam_selesai, total_bayar = @total_bayar WHERE id_transaksi = @id_transaksi", conn))
+                {
+                    cmdT.Parameters.AddWithValue("@id_transaksi", selectedId);
+                    cmdT.Parameters.AddWithValue("@id_unit", id_unit);
+                    cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
+                    cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
+                    cmdT.Parameters.AddWithValue("@total_bayar", txtTotal.Text == "" ? 0 : int.Parse(txtTotal.Text));
+                    cmdT.ExecuteNonQuery();
+                }
 
-                string queryT = @"UPDATE Transaksi 
-                          SET id_unit=@unit, jam_mulai=@mulai, jam_selesai=@selesai, total_bayar=@total 
-                          WHERE id_transaksi=@id";
-                SqlCommand cmdT = new SqlCommand(queryT, conn);
-                cmdT.Parameters.AddWithValue("@unit", id_unit);
-                cmdT.Parameters.AddWithValue("@mulai", dtMulai.Value);
-                cmdT.Parameters.AddWithValue("@selesai", dtSelesai.Value);
-                cmdT.Parameters.AddWithValue("@total", total);
-                cmdT.Parameters.AddWithValue("@id", selectedId);
-
-                int result = cmdT.ExecuteNonQuery();
-                MessageBox.Show("Row terupdate: " + result);
                 MessageBox.Show("Data berhasil diupdate!");
-
                 conn.Close();
+
                 LoadData();
+
+                selectedId = "";
+                txtNama.Text = "";
+                txtNoHP.Text = "";
+                txtTotal.Text = "";
+                cmbUnit.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
