@@ -198,30 +198,35 @@ namespace SistemRentalPS
                     }
 
                     string query = @"UPDATE UnitPS
-                          SET nama_unit = @nama_unit,
-                              tipe_ps = @tipe_ps,
-                              harga_perjam = @harga_perjam,
-                              status = @status
-                          WHERE id_unit = @id";
+                         SET nama_unit = @nama_unit,
+                             tipe_ps = @tipe_ps,
+                             harga_perjam = @harga_perjam,
+                             status = @status
+                         WHERE id_unit = @id";
                     SqlCommand cmd = new SqlCommand(query, conn);
 
-                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-                    cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
-                    cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
-                    cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-                    cmd.Parameters.AddWithValue("@id", dgvUnit.CurrentRow.Cells[0].Value);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    if (result > 0)
+                    using (SqlCommand cmd = new SqlCommand("sp_UpdateUnitPS", conn))
                     {
-                        MessageBox.Show("Data Unit PS berhasil diupdate");
-                        ClearForm();
-                        btnTampilkanUnit.PerformClick();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data gagal diupdate");
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        //cmd.Parameters.AddWithValue("@id_unit", txtIDUnit.Text);
+                        cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+                        cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
+                        cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
+                        cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
+                        cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
+
+                        int result = cmd.ExecuteNonQuery();
+
+                        if (result < 0)
+                        {
+                            MessageBox.Show("Data Unit PS berhasil diupdate");
+                            ClearForm();
+                            LoadData();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Data gagal diupdate");
+                        }
                     }
                 }
             }
