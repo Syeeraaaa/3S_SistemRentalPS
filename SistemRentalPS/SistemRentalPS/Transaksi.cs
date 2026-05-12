@@ -52,7 +52,20 @@ namespace SistemRentalPS
                 dt = new DataTable();
                 adapter.Fill(dt);
 
+                bindingSource1.DataSource = dt;
+                dgvTransaksi.DataSource = bindingSource1;
 
+                if (dgvTransaksi.Columns["id_transaksi"] != null)
+                {
+                    dgvTransaksi.Columns["id_transaksi"].Visible = false;
+                }
+
+                if (bindingNavigator1 != null)
+                {
+                    bindingNavigator1.BindingSource = bindingSource1;
+                }
+
+                conn.Close();
 
             }
             catch (Exception ex)
