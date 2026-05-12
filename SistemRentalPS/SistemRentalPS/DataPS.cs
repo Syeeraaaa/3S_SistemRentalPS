@@ -378,26 +378,30 @@ namespace SistemRentalPS
                                     nama_game = @nama_game,
                                     genre = @genre
                                 WHERE id_game = @id_game";
-                    SqlCommand cmd = new SqlCommand(query, conn);
+                    using (SqlCommand cmd = new SqlCommand("sp_UpdateGamePS", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_game", int.Parse(id_game));
+                        cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
+                        cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
+                        cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
 
-                cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
-                cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
-                cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
+                        int result = cmd.ExecuteNonQuery();
+                        //MessageBox.Show("Rows affected: " + result);
 
-                int result = cmd.ExecuteNonQuery();
+                        if (result < 0)
+                        {
+                            MessageBox.Show("Data Unit PS berhasil diupdate");
+                            ClearForm();
+                            btnTampilkanGame.PerformClick();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Data gagal diupdate");
+                        }
+                    }
 
-                if (result > 0)
-                {
-                    MessageBox.Show("Data Unit PS berhasil diupdate");
-                    ClearForm();
-                    btnUpdateGame.PerformClick();
                 }
-                else
-                {
-                    MessageBox.Show("Data gagal diupdate");
-                }
-
-            }
             catch (Exception ex)
             {
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
