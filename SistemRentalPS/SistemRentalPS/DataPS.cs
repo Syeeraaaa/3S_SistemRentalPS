@@ -619,6 +619,32 @@ namespace SistemRentalPS
                 MessageBox.Show("Reset gagal: " + ex.Message);
             }
         }
+
+        private void btnTestInjection_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (SqlConnection conn = Koneksi())
+                {
+                    conn.Open();
+
+                    string query =
+                        "UPDATE UnitPS SET nama_unit='HACKED' WHERE tipe_ps='" +
+                        txtTipePS.Text + "'";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        int result = cmd.ExecuteNonQuery();
+                        MessageBox.Show(result + " baris terupdate");
+                    }
+                }
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
     }
 }
 
