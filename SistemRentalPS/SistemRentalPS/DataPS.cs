@@ -260,12 +260,10 @@ namespace SistemRentalPS
 
                     if (resultConfirm == DialogResult.Yes)
                     {
-                        string query = "DELETE FROM RentalPS WHERE nama_unit = @nama_unit";
-
-                        SqlCommand cmd = new SqlCommand(query, conn);
-                        cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-
-                        int result = cmd.ExecuteNonQuery();
+                        string deleteGame = "DELETE FROM Game WHERE id_unit = @id_unit";
+                        SqlCommand cmdGame = new SqlCommand(deleteGame, conn);
+                        cmdGame.Parameters.AddWithValue("@id_unit", id_unit);
+                        cmdGame.ExecuteNonQuery();
 
                         if (result > 0)
                         {
