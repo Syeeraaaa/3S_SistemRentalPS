@@ -218,34 +218,18 @@ namespace SistemRentalPS
                 else if (cmbUnit.Text == "PS4") id_unit = 2;
                 else if (cmbUnit.Text == "PS5") id_unit = 3;
 
-                
-                string queryT = @"INSERT INTO Transaksi
-                (id_pelanggan, id_unit, tanggal, jam_mulai, jam_selesai, total_bayar)
-                VALUES (@id_pelanggan, @id_unit, @Tanggal, @Mulai, @Selesai, @Total)";
+                using (SqlCommand cmdT = new SqlCommand("INSERT INTO Transaksi (id_pelanggan, id_unit, jam_mulai, jam_selesai, total_bayar) VALUES (@id_pelanggan, @id_unit, @jam_mulai, @jam_selesai, @total_bayar)", conn))
+                {
+                    cmdT.Parameters.AddWithValue("@id_pelanggan", id_pelanggan);
+                    cmdT.Parameters.AddWithValue("@id_unit", id_unit);
+                    cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
+                    cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
+                    cmdT.Parameters.AddWithValue("@total_bayar", txtTotal.Text == "" ? 0 : int.Parse(txtTotal.Text));
+                    cmdT.ExecuteNonQuery();
+                }
 
-                SqlCommand cmdT = new SqlCommand(queryT, conn);
-                cmdT.Parameters.AddWithValue("@id_pelanggan", id_pelanggan);
-                cmdT.Parameters.AddWithValue("@id_unit", id_unit);
-                cmdT.Parameters.AddWithValue("@Tanggal", DateTime.Now.Date);
-                cmdT.Parameters.AddWithValue("@Mulai", dtMulai.Value.TimeOfDay);
-                cmdT.Parameters.AddWithValue("@Selesai", dtSelesai.Value.TimeOfDay);
-                cmdT.Parameters.AddWithValue("@Total", int.Parse(txtTotal.Text));
 
-                cmdT.ExecuteNonQuery();
-
-                MessageBox.Show("Data berhasil disimpan");
-
-                conn.Close();
-
-                
-                txtNama.Clear();
-                txtNoHP.Clear();
-                txtTotal.Clear();
-                cmbUnit.SelectedIndex = -1;
-                dtMulai.Value = DateTime.Now;
-                dtSelesai.Value = DateTime.Now.AddHours(1);
-
-                LoadData();
+                    LoadData();
             }
             catch (Exception ex)
             {
