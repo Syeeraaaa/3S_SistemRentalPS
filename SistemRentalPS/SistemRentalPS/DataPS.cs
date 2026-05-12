@@ -298,7 +298,10 @@ namespace SistemRentalPS
         {
             try
             {
-                Koneksi();
+                using (SqlConnection conn = Koneksi())
+                { 
+                }
+                    Koneksi();
                 if (conn.State == System.Data.ConnectionState.Closed)
                 {
                     conn.Open();
