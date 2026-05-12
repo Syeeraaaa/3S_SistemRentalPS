@@ -10,21 +10,20 @@ namespace SistemRentalPS
     public partial class Transaksi : Form
     {
         SqlConnection conn;
-        SqlCommand cmd;
-        SqlDataReader reader;
+        //SqlCommand cmd;
+        //SqlDataReader reader;
         SqlDataAdapter adapter;
         DataTable dt;
 
         string selectedId = "";
 
-        string connString = "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True";
-
+        string connString = "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True; Encrypt=False; TrustServerCertificate=True";
         public Transaksi()
         {
             InitializeComponent();
             conn = new SqlConnection(connString);
 
-            this.dgvTransaksi.CellClick += new DataGridViewCellEventHandler(this.dgvTransaksi_CellContentClick);
+            
         }
 
         private void LoadData()
@@ -34,19 +33,18 @@ namespace SistemRentalPS
                 if (conn.State == ConnectionState.Closed)
                     conn.Open();
 
-                dgvTransaksi.Rows.Clear(); 
-
                 string query = @"SELECT 
-                    t.id_transaksi,
-                    p.nama_pelanggan AS nama,
-                    p.no_hp AS no_hp,
-                    u.nama_unit AS unit,
-                    t.jam_mulai,
-                    t.jam_selesai,
-                    t.total_bayar
-                FROM Transaksi t
-                JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
-                JOIN UnitPS u ON t.id_unit = u.id_unit";
+                                    t.id_transaksi,
+                                    p.nama_pelanggan AS 'Nama Pelanggan',
+                                    p.no_hp AS 'No HP',
+                                    u.nama_unit AS 'Unit',
+                                    t.jam_mulai AS 'Jam Mulai',
+                                    t.jam_selesai AS 'Jam Selesai',
+                                    t.total_bayar AS 'Total Bayar'
+                                FROM Transaksi t
+                                JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
+                                JOIN UnitPS u ON t.id_unit = u.id_unit
+                                ORDER BY t.id_transaksi DESC";
 
                 adapter = new SqlDataAdapter(query, conn);
                 dt = new DataTable();
@@ -66,11 +64,10 @@ namespace SistemRentalPS
                 }
 
                 conn.Close();
-
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Gagal load data: " + ex.Message);
+                MessageBox.Show("Error Load Data: " + ex.Message);
             }
         }
 
@@ -88,32 +85,11 @@ namespace SistemRentalPS
 
         private void btnMulai_Click_1(object sender, EventArgs e)
         {
-            
-            if (dtMulai.Value.TimeOfDay >= dtSelesai.Value.TimeOfDay)
-            {
-                MessageBox.Show("Jam Selesai harus LEBIH BESAR dari Jam Mulai!",
-                                "Validasi Gagal",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
-                return;
-            }
 
             TimeSpan durasi = dtSelesai.Value - dtMulai.Value;
-            int jam = (int)durasi.TotalHours;
+            int jam = (int)Math.Ceiling(durasi.TotalHours);
             if (jam <= 0) jam = 1;
-            if (durasi.TotalHours > 24)
-            {
-                MessageBox.Show("Durasi tidak boleh lebih dari 24 jam!", "Batas Durasi maximal",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-                dtSelesai.Value = dtMulai.Value.AddHours(24);
-                return;
-            }
-
-
-            int tarifPerJam = 10000;
-            int total = jam * tarifPerJam;
-
+            int total = jam * 10000;
             txtTotal.Text = total.ToString();
             MessageBox.Show("Durasi: " + jam + " jam, Total: Rp " + total);
         }
@@ -122,97 +98,53 @@ namespace SistemRentalPS
         {
             dtMulai.Format = DateTimePickerFormat.Custom;
             dtMulai.CustomFormat = "dd/MM/yyyy HH:mm";
-            dtMulai.ShowUpDown = false;
+            dtMulai.ShowUpDown = true;
 
             dtSelesai.Format = DateTimePickerFormat.Custom;
             dtSelesai.CustomFormat = "dd/MM/yyyy HH:mm";
-            dtSelesai.ShowUpDown = false;
+            dtSelesai.ShowUpDown = true;
 
             cmbUnit.Items.Clear();
             cmbUnit.Items.Add("PS3");
             cmbUnit.Items.Add("PS4");
             cmbUnit.Items.Add("PS5");
 
-           
-
+            dgvTransaksi.AutoGenerateColumns = true;
             dgvTransaksi.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvTransaksi.MultiSelect = false;
             dgvTransaksi.ReadOnly = true;
-            dgvTransaksi.AllowUserToAddRows = false;
             dgvTransaksi.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            dgvTransaksi.Columns.Add("id_transaksi", "ID");
-            dgvTransaksi.Columns["id_transaksi"].Visible = false;
-            dgvTransaksi.Columns.Add("nama", "Nama Pelanggan");
-            dgvTransaksi.Columns.Add("no_hp", "No HP");
-            dgvTransaksi.Columns.Add("unit", "Unit");
-            dgvTransaksi.Columns.Add("jam_mulai", "Jam Mulai");
-            dgvTransaksi.Columns.Add("jam_selesai", "Jam Selesai");
-            dgvTransaksi.Columns.Add("total_bayar", "Total Bayar");
 
             LoadData();
         }
 
         private void btnSelesai_Click_1(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtTotal.Text) || txtTotal.Text == "0")
-            {
-                MessageBox.Show("Tekan tombol MULAI terlebih dahulu!");
-                return;
-            }
-            MessageBox.Show("Transaksi selesai. Total Bayar: Rp " + txtTotal.Text);
+            MessageBox.Show("Total Bayar: Rp " + txtTotal.Text);
         }
 
         private void btnSimpan_Click_1(object sender, EventArgs e)
         {
-           
-            if (string.IsNullOrWhiteSpace(txtNama.Text) || txtNama.Text.Any(char.IsDigit))
-            {
-                MessageBox.Show("Nama Pelanggan harus diisi dan hanya boleh HURUF!");
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(txtNoHP.Text) || txtNoHP.Text.Any(char.IsLetter))
-            {
-                MessageBox.Show("No HP harus diisi dan hanya boleh ANGKA!");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(cmbUnit.Text))
-            {
-                MessageBox.Show("Pilih Unit terlebih dahulu!");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(txtTotal.Text) || txtTotal.Text == "0")
-            {
-                MessageBox.Show("Hitung durasi dulu dengan tombol MULAI!");
-                return;
-            }
-
-            
-            if (dtMulai.Value.TimeOfDay >= dtSelesai.Value.TimeOfDay)
-            {
-                MessageBox.Show("Jam Selesai harus lebih besar dari Jam Mulai!");
-                return;
-            }
 
             try
             {
+                if (string.IsNullOrWhiteSpace(txtNama.Text))
+                {
+                    MessageBox.Show("Nama harus diisi!");
+                    return;
+                }
+
                 if (conn.State == ConnectionState.Closed)
                     conn.Open();
 
-                
                 string queryP = @"INSERT INTO Pelanggan (nama_pelanggan, no_hp)
                           OUTPUT INSERTED.id_pelanggan
                           VALUES (@nama, @nohp)";
-
                 SqlCommand cmdP = new SqlCommand(queryP, conn);
                 cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
                 cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
-
                 int id_pelanggan = (int)cmdP.ExecuteScalar();
 
-                
                 int id_unit = 1;
                 if (cmbUnit.Text == "PS3") id_unit = 1;
                 else if (cmbUnit.Text == "PS4") id_unit = 2;
@@ -236,16 +168,31 @@ namespace SistemRentalPS
                 txtTotal.Text = "";
                 cmbUnit.SelectedIndex = -1;
 
-
                 LoadData();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message);
+                MessageBox.Show("Error Simpan: " + ex.Message);
             }
         }
 
         private void dgvTransaksi_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dgvTransaksi.SelectedRows.Count > 0)
+            {
+                DataGridViewRow row = dgvTransaksi.SelectedRows[0];
+
+                selectedId = row.Cells[0].Value.ToString();
+                txtNama.Text = row.Cells[1].Value.ToString();
+                txtNoHP.Text = row.Cells[2].Value.ToString();
+                cmbUnit.Text = row.Cells[3].Value.ToString();
+                dtMulai.Text = row.Cells[4].Value.ToString();
+                dtSelesai.Text = row.Cells[5].Value.ToString();
+                txtTotal.Text = row.Cells[6].Value.ToString();
+            }
+        }
+
+        private void dgvTransaksi_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvTransaksi.SelectedRows.Count > 0)
             {
@@ -291,7 +238,6 @@ namespace SistemRentalPS
                     return;
                 }
 
-
                 if (conn.State == ConnectionState.Closed)
                     conn.Open();
 
@@ -332,7 +278,7 @@ namespace SistemRentalPS
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message);
+                MessageBox.Show("Error Update: " + ex.Message);
             }
         }
 
