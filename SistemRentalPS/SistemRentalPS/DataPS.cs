@@ -203,7 +203,7 @@ namespace SistemRentalPS
                              harga_perjam = @harga_perjam,
                              status = @status
                          WHERE id_unit = @id";
-                    SqlCommand cmd = new SqlCommand(query, conn);
+                    
 
                     using (SqlCommand cmd = new SqlCommand("sp_UpdateUnitPS", conn))
                     {
@@ -236,40 +236,47 @@ namespace SistemRentalPS
             }
         }
 
+        // ------------------------
+        // TOMBOL HAPUS BUAT UNIT
+        // ------------------------
         private void btnHapus_Click_1(object sender, EventArgs e)
         {
             try
             {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
+                using (SqlConnection conn = Koneksi())
                 {
                     conn.Open();
-                }
-
-                DialogResult resultConfirm = MessageBox.Show(
-                    "Apakah anda yakin menghapus data ini?",
-                    "Konfirmasi",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (resultConfirm == DialogResult.Yes)
-                {
-                    string query = "DELETE FROM RentalPS WHERE nama_unit = @nama_unit";
-
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    if (result > 0)
+                    if (string.IsNullOrEmpty(id_unit))
                     {
-                        MessageBox.Show("Data Unit PS berhasil dihapus");
-                        ClearForm();
-                        btnHapus.PerformClick();
+                        MessageBox.Show("Pilih data dulu!");
+                        return;
                     }
-                    else
+
+                    DialogResult resultConfirm = MessageBox.Show(
+                        "Apakah anda yakin menghapus data ini?",
+                        "Konfirmasi",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
+
+                    if (resultConfirm == DialogResult.Yes)
                     {
-                        MessageBox.Show("Data gagal dihapus");
+                        string query = "DELETE FROM RentalPS WHERE nama_unit = @nama_unit";
+
+                        SqlCommand cmd = new SqlCommand(query, conn);
+                        cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+
+                        int result = cmd.ExecuteNonQuery();
+
+                        if (result > 0)
+                        {
+                            MessageBox.Show("Data Unit PS berhasil dihapus");
+                            ClearForm();
+                            btnHapus.PerformClick();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Data gagal dihapus");
+                        }
                     }
                 }
             }
