@@ -267,15 +267,23 @@ namespace SistemRentalPS
 
                         string query = "DELETE FROM UnitPS WHERE id_unit = @id_unit";
 
-                        if (result > 0)
+                        using (SqlCommand cmd = new SqlCommand("sp_DeleteUnitPS", conn))
                         {
-                            MessageBox.Show("Data Unit PS berhasil dihapus");
-                            ClearForm();
-                            btnHapus.PerformClick();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Data gagal dihapus");
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
+
+                            int result = cmd.ExecuteNonQuery();
+
+                            if (result < 0)
+                            {
+                                MessageBox.Show("Data Unit PS berhasil dihapus");
+                                ClearForm();
+                                btnTampilkanUnit.PerformClick();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Data gagal dihapus");
+                            }
                         }
                     }
                 }
