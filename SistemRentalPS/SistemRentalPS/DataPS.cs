@@ -363,18 +363,22 @@ namespace SistemRentalPS
         {
             try
             {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
+                using (SqlConnection conn = Koneksi())
+                { 
+                
+                    
+                    if (conn.State == System.Data.ConnectionState.Closed)
+                    {
+                        conn.Open();
+                    }
 
-                string query = @"UPDATE Game
-                          SET 
-                              nama_game = @nama_game,
-                              genre = @genre,
-                          WHERE id_unit = @id_unit";
-                SqlCommand cmd = new SqlCommand(query, conn);
+                    string query = @"UPDATE Game
+                                SET 
+                                    id_unit = @id_unit,
+                                    nama_game = @nama_game,
+                                    genre = @genre
+                                WHERE id_game = @id_game";
+                    SqlCommand cmd = new SqlCommand(query, conn);
 
                 cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
                 cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
@@ -392,6 +396,7 @@ namespace SistemRentalPS
                 {
                     MessageBox.Show("Data gagal diupdate");
                 }
+
             }
             catch (Exception ex)
             {
