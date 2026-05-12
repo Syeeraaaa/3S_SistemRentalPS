@@ -364,9 +364,9 @@ namespace SistemRentalPS
             try
             {
                 using (SqlConnection conn = Koneksi())
-                { 
-                
-                    
+                {
+
+
                     if (conn.State == System.Data.ConnectionState.Closed)
                     {
                         conn.Open();
@@ -402,6 +402,7 @@ namespace SistemRentalPS
                     }
 
                 }
+            }
             catch (Exception ex)
             {
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
@@ -412,7 +413,8 @@ namespace SistemRentalPS
         {
             try
             {
-                Koneksi();
+                using (SqlConnection conn = Koneksi())
+                {
                 if (conn.State == System.Data.ConnectionState.Closed)
                 {
                     conn.Open();
@@ -424,24 +426,30 @@ namespace SistemRentalPS
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
-                if (resultConfirm == DialogResult.Yes)
-                {
-                    string query = "DELETE FROM Game WHERE id_unit = @id_unit";
-
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.Text);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    if (result > 0)
+                    if (resultConfirm == DialogResult.Yes)
                     {
-                        MessageBox.Show("Data Unit PS berhasil dihapus");
-                        ClearForm();
-                        btnHapus.PerformClick();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data gagal dihapus");
+                        string query = "DELETE FROM Game WHERE id_game = @id_game";
+
+                        using (SqlCommand cmd = new SqlCommand("sp_DeleteGamePS", conn))
+                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            //cmd.Parameters.AddWithValue("@id_game", cmbPilihUnit.SelectedValue);
+                            cmd.Parameters.AddWithValue("@id_game", id_game);
+
+                            int result = cmd.ExecuteNonQuery();
+
+                            if (result > 0)
+                            {
+                                MessageBox.Show("Data Unit PS berhasil dihapus");
+                                ClearForm();
+                                //btnHapus.PerformClick();
+                                btnTampilkanGame_Click(sender, e);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Data gagal dihapus");
+                            }
+                        }
                     }
                 }
             }
