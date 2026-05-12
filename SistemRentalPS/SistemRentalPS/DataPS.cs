@@ -426,16 +426,40 @@ namespace SistemRentalPS
 
         private void btnTampilGame_Click(object sender, EventArgs e)
         {
-            Koneksi();
-            conn.Open();
+            try
+            {
+                using (SqlConnection conn = Koneksi())
+                {
 
-            string query = "Select * from Game";
-            SqlDataAdapter da = new SqlDataAdapter(query, conn);
 
-            DataTable dt = new DataTable();
-            da.Fill(dt);
+                    //Koneksi();
+                    conn.Open();
 
-            dgvGamee.DataSource = dt;
+                    string query = @"
+                            SELECT 
+                                g.id_game,
+                                g.id_unit,
+                                u.nama_unit,
+                                g.nama_game,
+                                g.genre
+                            FROM Game g
+                            LEFT JOIN UnitPS u ON g.id_unit = u.id_unit
+                            ";
+                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    {
+                        // SqlDataAdapter da = new SqlDataAdapter(query, conn);
+
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+
+                        dgvGamee.DataSource = dt;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+            }
         }
 
         private void dgvUnit_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -464,6 +488,59 @@ namespace SistemRentalPS
         private void txtHargaJam_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void dgvGamee_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvGamee.Rows[e.RowIndex];
+
+                id_game = row.Cells["id_game"].Value.ToString();
+                cmbPilihUnit.Text = row.Cells["id_unit"].Value.ToString();
+                txtNamaGame.Text = row.Cells["nama_game"].Value.ToString();
+                cmbGenre.Text = row.Cells["genre"].Value.ToString();
+
+            }
+        }
+
+        private void DataPS_Load(object sender, EventArgs e)
+        {
+            cmbStatus.DataSource = new string[] { "Tersedia", "Dipakai", "Maintenance" };
+
+            dgvUnit.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvUnit.MultiSelect = false;
+            dgvUnit.ReadOnly = true;
+            dgvUnit.AllowUserToAddRows = false;
+            dgvUnit.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            LoadComboUnit();
+            LoadData();
+        }
+
+        private void LoadComboUnit()
+        {
+
+            using (conn = Koneksi())
+            {
+                Koneksi();
+                if (conn.State == System.Data.ConnectionState.Closed)
+                {
+                    conn.Open();
+                }
+
+                string query = "SELECT id_unit, nama_unit FROM UnitPS";
+               
+                da = new SqlDataAdapter(query, conn);
+                dt = new DataTable();
+                da.Fill(dt);
+
+                cmbPilihUnit.DataSource = dt;
+                cmbPilihUnit.DisplayMember = "nama_unit";
+                cmbPilihUnit.ValueMember = "id_unit";
+
+
+            }
         }
     }
 }
