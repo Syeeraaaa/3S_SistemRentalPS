@@ -34,8 +34,8 @@ namespace SistemRentalPS
             InitializeComponent();
         }
 
-      
-        
+
+
         private void ClearForm()
         {
             txtNamaUnit.Clear();
