@@ -454,13 +454,14 @@ namespace SistemRentalPS
             {
                 DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
 
-                id_unit = row.Cells[0].Value.ToString();    
+                id_unit = row.Cells["id_unit"].Value.ToString();
                 txtNamaUnit.Text = row.Cells[1].Value.ToString();
                 txtTipePS.Text = row.Cells["tipe_ps"].Value.ToString();
                 txtHargaJam.Text = row.Cells["harga_perjam"].Value.ToString();
                 cmbStatus.Text = row.Cells["status"].Value.ToString();
+
             }
-        
+
         }
 
         private void dashboardToolStripMenuItem_Click(object sender, EventArgs e)
