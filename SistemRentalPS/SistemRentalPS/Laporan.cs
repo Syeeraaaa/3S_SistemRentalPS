@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -96,20 +97,50 @@ namespace SistemRentalPS
 
         private void label4_Click(object sender, EventArgs e)
         {
+            //try
+            //{
+                //Koneksi();
+                //conn.Open();
+
+                //string query = "SELECT SUM(total_bayar) FROM Transaksi";
+                //cmd = new SqlCommand(query, conn);
+                //int jumlah = (int)cmd.ExecuteScalar();
+                //label4.Text = jumlah.ToString();
+                //conn.Close();
+            //}
+            //catch (Exception ex)
+            //{
+              //  MessageBox.Show(ex.Message);
+            //}
+        }
+
+        
+        private void TotalPendapatan() //BUAT UCP 2
+        {
             try
             {
-                Koneksi();
-                conn.Open();
 
-                string query = "SELECT SUM(total_bayar) FROM Transaksi";
-                cmd = new SqlCommand(query, conn);
-                int jumlah = (int)cmd.ExecuteScalar();
-                label4.Text = jumlah.ToString();
-                conn.Close();
+                Koneksi();  
+                //using (SqlConnection conn = new SqlConnection(connectionString))
+                //{
+                    using (SqlCommand cmd = new SqlCommand("sp_TotalPendapatan", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        SqlParameter outputParam = new SqlParameter("@Total", SqlDbType.Int);
+                        outputParam.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(outputParam);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                        label4.Text = "Total Pendapatan:Rp. " + outputParam.Value.ToString();
+
+                    }
+                //}
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Gagal Menghitung Total Pendapatan: " + ex.Message);
             }
         }
 
@@ -179,6 +210,41 @@ namespace SistemRentalPS
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
+        }
+
+        private void Laporan_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                Koneksi();
+                conn.Open();
+
+                TimeSpan selisih = dtmSampai.Value.Date - dtmDari.Value.Date;
+                double totalHari = selisih.TotalDays;
+                if (totalHari > 30)
+                {
+                    MessageBox.Show("Maksimal cek laporan 30 hari!", "Batas Laporan Maksimal melebihi 30 hari", MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
+            }
+
+            TotalPendapatan();
+        }
+
+        private void dtmDari_ValueChanged(object sender, EventArgs e)
+        {
+            dtmSampai.MaxDate = dtmDari.Value.AddDays(30);
+        }
+
+        private void dtmSampai_ValueChanged(object sender, EventArgs e)
+        {
+            
         }
     }
 }
