@@ -13,7 +13,8 @@ namespace SistemRentalPS
 {
     public partial class DataPS : Form
     {
-
+        private BindingSource bindingSource = new BindingSource(); 
+        private DataTable dt = new DataTable();
         SqlConnection conn;
         SqlCommand cmd;
         SqlDataReader reader;
@@ -118,7 +119,7 @@ namespace SistemRentalPS
                     txtTipePS.Focus();
                     return;
                 }
-                if (txtHargaJam.Text == "")
+                if (txtHargaJam.Text == "" || txtHargaJam.Text.Any(char.IsLetter))
                 {
                     MessageBox.Show("Harga/Jam harus diisi");
                     txtHargaJam.Focus();
@@ -437,6 +438,11 @@ namespace SistemRentalPS
             Dashboardcs dasboard = new Dashboardcs();
             dasboard.Show();
             this.Hide();
+        }
+
+        private void txtHargaJam_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
