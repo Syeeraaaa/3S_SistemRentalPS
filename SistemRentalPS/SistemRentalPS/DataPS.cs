@@ -154,7 +154,7 @@ namespace SistemRentalPS
                     {
                         MessageBox.Show("Data Unit PS berhasil ditambahkan");
                         ClearForm();
-                        btnTambah.PerformClick();
+                        LoadData();
                     }
                     else
                     {
@@ -178,46 +178,53 @@ namespace SistemRentalPS
 
         }
 
+        // ------------------------
+        // TOMBOL UPDATE BUAT UNIT
+        // ------------------------
         private void btnUpdate_Click_1(object sender, EventArgs e)
         {
             try
             {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
+                using (SqlConnection conn = Koneksi())
                 {
-                    conn.Open();
-                }
-                if (dgvUnit.CurrentRow == null)
-                {
-                    MessageBox.Show("Klik paada bagian baris yang ingin diupdate!");
-                    return;
-                }
 
-                string query = @"UPDATE UnitPS
+                    Koneksi();
+                    if (conn.State == System.Data.ConnectionState.Closed)
+                    {
+                        conn.Open();
+                    }
+                    if (dgvUnit.CurrentRow == null)
+                    {
+                        MessageBox.Show("Klik paada bagian baris yang ingin diupdate!");
+                        return;
+                    }
+
+                    string query = @"UPDATE UnitPS
                           SET nama_unit = @nama_unit,
                               tipe_ps = @tipe_ps,
                               harga_perjam = @harga_perjam,
                               status = @status
                           WHERE id_unit = @id";
-                SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlCommand cmd = new SqlCommand(query, conn);
 
-                cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-                cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
-                cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
-                cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-                cmd.Parameters.AddWithValue("@id", dgvUnit.CurrentRow.Cells[0].Value);
+                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+                    cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
+                    cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
+                    cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
+                    cmd.Parameters.AddWithValue("@id", dgvUnit.CurrentRow.Cells[0].Value);
 
-                int result = cmd.ExecuteNonQuery();
+                    int result = cmd.ExecuteNonQuery();
 
-                if (result > 0)
-                {
-                    MessageBox.Show("Data Unit PS berhasil diupdate");
-                    ClearForm();
-                    btnTampilkanUnit.PerformClick();
-                }
-                else
-                {
-                    MessageBox.Show("Data gagal diupdate");
+                    if (result > 0)
+                    {
+                        MessageBox.Show("Data Unit PS berhasil diupdate");
+                        ClearForm();
+                        btnTampilkanUnit.PerformClick();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Data gagal diupdate");
+                    }
                 }
             }
             catch (Exception ex)
