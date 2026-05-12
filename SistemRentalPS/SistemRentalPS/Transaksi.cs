@@ -247,21 +247,17 @@ namespace SistemRentalPS
 
         private void dgvTransaksi_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (dgvTransaksi.SelectedRows.Count > 0)
             {
-                int i = e.RowIndex;
+                DataGridViewRow row = dgvTransaksi.SelectedRows[0];
 
-                selectedId = dgvTransaksi.Rows[i].Cells[0].Value.ToString();
-
-
-                MessageBox.Show("ID keambil: " + selectedId);
-
-                txtNama.Text = dgvTransaksi.Rows[i].Cells[1].Value.ToString();
-                txtNoHP.Text = dgvTransaksi.Rows[i].Cells[2].Value.ToString();
-                cmbUnit.Text = dgvTransaksi.Rows[i].Cells[3].Value.ToString();
-                dtMulai.Value = DateTime.Parse(dgvTransaksi.Rows[i].Cells[4].Value.ToString());
-                dtSelesai.Value = DateTime.Parse(dgvTransaksi.Rows[i].Cells[5].Value.ToString());
-                txtTotal.Text = dgvTransaksi.Rows[i].Cells[6].Value.ToString();
+                selectedId = row.Cells["id_transaksi"].Value.ToString();
+                txtNama.Text = row.Cells["Nama Pelanggan"].Value.ToString();
+                txtNoHP.Text = row.Cells["No HP"].Value.ToString();
+                cmbUnit.Text = row.Cells["Unit"].Value.ToString();
+                dtMulai.Text = row.Cells["Jam Mulai"].Value.ToString();
+                dtSelesai.Text = row.Cells["Jam Selesai"].Value.ToString();
+                txtTotal.Text = row.Cells["Total Bayar"].Value.ToString();
             }
         }
 
