@@ -22,9 +22,9 @@ namespace SistemRentalPS
         string id_game;
         SqlDataAdapter da;
 
-        private void Koneksi()
+        private SqlConnection Koneksi()
         {
-            conn = new SqlConnection(
+            return new SqlConnection(
              "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True"
             );
         }
