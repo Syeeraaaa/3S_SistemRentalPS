@@ -15,18 +15,19 @@ namespace SistemRentalPS
     {
         private BindingSource bindingSource = new BindingSource(); 
         private DataTable dt = new DataTable();
-        SqlConnection conn;
+        //SqlConnection conn;
         SqlCommand cmd;
         SqlDataReader reader;
         string id_unit;
         string id_game;
         SqlDataAdapter da;
 
+        private readonly string connectionString =
+    "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True";
+
         private SqlConnection Koneksi()
         {
-            return new SqlConnection(
-             "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True"
-            );
+            return new SqlConnection(connectionString);
         }
 
         public DataPS()
@@ -61,13 +62,12 @@ namespace SistemRentalPS
         // ------------------------
         private void btnTambah_Click_1(object sender, EventArgs e)
         {
-            try
-            {
+                try
+                {
                 using (SqlConnection conn = Koneksi())
                 {
                     conn.Open();
-
-
+                 
                     if (string.IsNullOrWhiteSpace(txtNamaUnit.Text))
                     {
                         MessageBox.Show("Nama Unit harus diisi");
@@ -107,15 +107,15 @@ namespace SistemRentalPS
 
                         int result = cmd.ExecuteNonQuery();
 
-                        if (result < 0)
+                        if (result > 0)
                         {
-                            MessageBox.Show("Data gagal ditambahkan");
+                            MessageBox.Show("Data Berhasil ditambahkan");
                             ClearForm();
                             LoadData();
                         }
                         else
                         {
-                            MessageBox.Show("Data Berhasil ditambahkan ditambahkan");
+                            MessageBox.Show("Data Gagal ditambahkan");
                         }
                     }
                 }
@@ -146,21 +146,21 @@ namespace SistemRentalPS
                 using (SqlConnection conn = Koneksi())
                 {
 
-                    Koneksi();
+                    //Koneksi();
                     
-                        conn.Open();
+                    conn.Open();
                     if (string.IsNullOrEmpty(id_unit))
                     {
                         MessageBox.Show("Klik pada bagian baris yang ingin diupdate!");
                         return;
                     }
 
-                    string query = @"UPDATE UnitPS
-                         SET nama_unit = @nama_unit,
-                             tipe_ps = @tipe_ps,
-                             harga_perjam = @harga_perjam,
-                             status = @status
-                         WHERE id_unit = @id";
+                    //string query = @"UPDATE UnitPS
+                         //SET nama_unit = @nama_unit,
+                             //tipe_ps = @tipe_ps,
+                             //harga_perjam = @harga_perjam,
+                             //status = @status
+                         //WHERE id_unit = @id";
                     
 
                     using (SqlCommand cmd = new SqlCommand("sp_UpdateUnitPS", conn))
@@ -180,6 +180,7 @@ namespace SistemRentalPS
                             MessageBox.Show("Data Unit PS berhasil diupdate");
                             ClearForm();
                             LoadData();
+                            id_unit = "";
                         }
                         else
                         {
@@ -223,7 +224,7 @@ namespace SistemRentalPS
                         cmdGame.Parameters.AddWithValue("@id_unit", id_unit);
                         cmdGame.ExecuteNonQuery();
 
-                        string query = "DELETE FROM UnitPS WHERE id_unit = @id_unit";
+                        //string query = "DELETE FROM UnitPS WHERE id_unit = @id_unit";
 
                         using (SqlCommand cmd = new SqlCommand("sp_DeleteUnitPS", conn))
                         {
@@ -232,11 +233,13 @@ namespace SistemRentalPS
 
                             int result = cmd.ExecuteNonQuery();
 
-                            if (result < 0)
+                            if (result > 0)
                             {
                                 MessageBox.Show("Data Unit PS berhasil dihapus");
                                 ClearForm();
-                                btnTampilkanUnit.PerformClick();
+                                //btnTampilkanUnit.PerformClick();
+                                LoadData();
+                                id_unit = "";
                             }
                             else
                             {
@@ -283,10 +286,10 @@ namespace SistemRentalPS
                         return;
                     }
 
-                    string query = @"INSERT INTO Game
-                          (id_unit,nama_game,genre)
-                          VALUES
-                          (@id_unit,@nama_game,@genre)";
+                    //string query = @"INSERT INTO Game
+                          //(id_unit,nama_game,genre)
+                          //VALUES
+                          //(@id_unit,@nama_game,@genre)";
                     using (SqlCommand cmd = new SqlCommand("sp_InsertGamePS", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -330,12 +333,12 @@ namespace SistemRentalPS
                         conn.Open();
                     }
 
-                    string query = @"UPDATE Game
-                                SET 
-                                    id_unit = @id_unit,
-                                    nama_game = @nama_game,
-                                   genre = @genre
-                                WHERE id_game = @id_game";
+                    //string query = @"UPDATE Game
+                                //SET 
+                                    //id_unit = @id_unit,
+                                    //nama_game = @nama_game,
+                                   //genre = @genre
+                                //WHERE id_game = @id_game";
                     using (SqlCommand cmd = new SqlCommand("sp_UpdateGamePS", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -347,7 +350,7 @@ namespace SistemRentalPS
                         int result = cmd.ExecuteNonQuery();
                         //MessageBox.Show("Rows affected: " + result);
 
-                        if (result < 0)
+                        if (result > 0)
                         {
                             MessageBox.Show("Data Unit PS berhasil diupdate");
                             ClearForm();
@@ -373,10 +376,12 @@ namespace SistemRentalPS
             {
                 using (SqlConnection conn = Koneksi())
                 {
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
                     conn.Open();
-                }
+
+                //if (conn.State == System.Data.ConnectionState.Closed)
+                //{
+                    //conn.Open();
+                //}
 
                 DialogResult resultConfirm = MessageBox.Show(
                     "Apakah anda yakin menghapus data ini?",
@@ -490,7 +495,7 @@ namespace SistemRentalPS
                 DataGridViewRow row = dgvGamee.Rows[e.RowIndex];
 
                 id_game = row.Cells["id_game"].Value.ToString();
-                cmbPilihUnit.Text = row.Cells["id_unit"].Value.ToString();
+                cmbPilihUnit.SelectedValue = row.Cells["id_unit"].Value;
                 txtNamaGame.Text = row.Cells["nama_game"].Value.ToString();
                 cmbGenre.Text = row.Cells["genre"].Value.ToString();
 
@@ -510,6 +515,7 @@ namespace SistemRentalPS
             dgvUnit.ReadOnly = true;
             dgvUnit.AllowUserToAddRows = false;
             dgvUnit.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            bindingNavigator1.BindingSource = bindingSource;
 
             LoadComboUnit();
             LoadData();
@@ -518,13 +524,13 @@ namespace SistemRentalPS
         private void LoadComboUnit()
         {
 
-            using (conn = Koneksi())
+            using (SqlConnection conn = Koneksi())
             {
-                Koneksi();
-                if (conn.State == System.Data.ConnectionState.Closed)
-                {
+                //Koneksi();
+                //if (conn.State == System.Data.ConnectionState.Closed)
+                //{
                     conn.Open();
-                }
+                //}
 
                 string query = "SELECT id_unit, nama_unit FROM UnitPS";
                
@@ -542,28 +548,23 @@ namespace SistemRentalPS
 
         private void LoadData()
         {
-            try
+            using (SqlConnection conn = Koneksi())
             {
-                using (SqlConnection conn = Koneksi())
+                using (SqlCommand cmd = new SqlCommand("sp_GetUnit", conn))
                 {
-                    conn.Open();
-                    string query = "SELECT * FROM vwUnitPS";
-                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                     {
                         dt = new DataTable();
                         da.Fill(dt);
 
                         bindingSource.DataSource = dt;
                         dgvUnit.DataSource = bindingSource;
-                        dgvUnit.Columns["id_unit"].Visible = false;
 
                         BindControls();
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Gagal load data: " + ex.Message);
             }
         }
 
@@ -641,6 +642,71 @@ namespace SistemRentalPS
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmbStatus_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label10_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmbPilihUnit_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmbGenre_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtNamaGame_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

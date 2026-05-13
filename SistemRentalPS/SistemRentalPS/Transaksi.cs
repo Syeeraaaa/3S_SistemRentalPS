@@ -30,40 +30,32 @@ namespace SistemRentalPS
         {
             try
             {
-                if (conn.State == ConnectionState.Closed)
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    // if (conn.State == ConnectionState.Closed)
                     conn.Open();
 
-                string query = @"SELECT 
-                                    t.id_transaksi,
-                                    p.nama_pelanggan AS 'Nama Pelanggan',
-                                    p.no_hp AS 'No HP',
-                                    u.nama_unit AS 'Unit',
-                                    t.jam_mulai AS 'Jam Mulai',
-                                    t.jam_selesai AS 'Jam Selesai',
-                                    t.total_bayar AS 'Total Bayar'
-                                FROM Transaksi t
-                                JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
-                                JOIN UnitPS u ON t.id_unit = u.id_unit
-                                ORDER BY t.id_transaksi DESC";
+                    string query = "SELECT * FROM vwTransaksi ORDER BY id_transaksi DESC";
 
-                adapter = new SqlDataAdapter(query, conn);
-                dt = new DataTable();
-                adapter.Fill(dt);
+                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                    dt = new DataTable();
+                    da.Fill(dt);
 
-                bindingSource1.DataSource = dt;
-                dgvTransaksi.DataSource = bindingSource1;
+                    bindingSource1.DataSource = dt;
+                    dgvTransaksi.DataSource = bindingSource1;
 
-                if (dgvTransaksi.Columns["id_transaksi"] != null)
-                {
-                    dgvTransaksi.Columns["id_transaksi"].Visible = false;
+                    if (dgvTransaksi.Columns["id_transaksi"] != null)
+                    {
+                        dgvTransaksi.Columns["id_transaksi"].Visible = false;
+                    }
+
+                    if (bindingNavigator1 != null)
+                    {
+                        bindingNavigator1.BindingSource = bindingSource1;
+                    }
                 }
 
-                if (bindingNavigator1 != null)
-                {
-                    bindingNavigator1.BindingSource = bindingSource1;
-                }
-
-                conn.Close();
+                //conn.Close();
             }
             catch (Exception ex)
             {
@@ -104,10 +96,7 @@ namespace SistemRentalPS
             dtSelesai.CustomFormat = "dd/MM/yyyy HH:mm";
             dtSelesai.ShowUpDown = true;
 
-            cmbUnit.Items.Clear();
-            cmbUnit.Items.Add("PS3");
-            cmbUnit.Items.Add("PS4");
-            cmbUnit.Items.Add("PS5");
+            LoadComboUnit();
 
             dgvTransaksi.AutoGenerateColumns = true;
             dgvTransaksi.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -125,50 +114,51 @@ namespace SistemRentalPS
 
         private void btnSimpan_Click_1(object sender, EventArgs e)
         {
-
+            
             try
             {
-                if (string.IsNullOrWhiteSpace(txtNama.Text))
+                using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    MessageBox.Show("Nama harus diisi!");
-                    return;
-                }
+                    if (string.IsNullOrWhiteSpace(txtNama.Text))
+                    {
+                        MessageBox.Show("Nama harus diisi!");
+                        return;
+                    }
 
-                if (conn.State == ConnectionState.Closed)
-                    conn.Open();
+                    if (conn.State == ConnectionState.Closed)
+                        conn.Open();
 
-                string queryP = @"INSERT INTO Pelanggan (nama_pelanggan, no_hp)
+                    string queryP = @"INSERT INTO Pelanggan (nama_pelanggan, no_hp)
                           OUTPUT INSERTED.id_pelanggan
                           VALUES (@nama, @nohp)";
-                SqlCommand cmdP = new SqlCommand(queryP, conn);
-                cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
-                cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
-                int id_pelanggan = (int)cmdP.ExecuteScalar();
+                    SqlCommand cmdP = new SqlCommand(queryP, conn);
+                    cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
+                    cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
+                    int id_pelanggan = (int)cmdP.ExecuteScalar();
 
-                int id_unit = 1;
-                if (cmbUnit.Text == "PS3") id_unit = 1;
-                else if (cmbUnit.Text == "PS4") id_unit = 2;
-                else if (cmbUnit.Text == "PS5") id_unit = 3;
+                    int id_unit = (int)cmbUnit.SelectedValue;
 
-                using (SqlCommand cmdT = new SqlCommand("INSERT INTO Transaksi (id_pelanggan, id_unit, jam_mulai, jam_selesai, total_bayar) VALUES (@id_pelanggan, @id_unit, @jam_mulai, @jam_selesai, @total_bayar)", conn))
-                {
-                    cmdT.Parameters.AddWithValue("@id_pelanggan", id_pelanggan);
-                    cmdT.Parameters.AddWithValue("@id_unit", id_unit);
-                    cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
-                    cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
-                    cmdT.Parameters.AddWithValue("@total_bayar", txtTotal.Text == "" ? 0 : int.Parse(txtTotal.Text));
-                    cmdT.ExecuteNonQuery();
+                    using (SqlCommand cmdT = new SqlCommand("sp_InsertTransaksi", conn))
+                    {
+                        cmdT.CommandType = CommandType.StoredProcedure;
+                        cmdT.Parameters.AddWithValue("@id_pelanggan", id_pelanggan);
+                        cmdT.Parameters.AddWithValue("@id_unit", id_unit);
+                        cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
+                        cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
+                        cmdT.Parameters.AddWithValue("@total_bayar", txtTotal.Text == "" ? 0 : int.Parse(txtTotal.Text));
+                        cmdT.ExecuteNonQuery();
+                    }
+
+                    MessageBox.Show("Data berhasil disimpan!");
+                    conn.Close();
+
+                    txtNama.Text = "";
+                    txtNoHP.Text = "";
+                    txtTotal.Text = "";
+                    cmbUnit.SelectedIndex = -1;
+
+                    LoadData();
                 }
-
-                MessageBox.Show("Data berhasil disimpan!");
-                conn.Close();
-
-                txtNama.Text = "";
-                txtNoHP.Text = "";
-                txtTotal.Text = "";
-                cmbUnit.SelectedIndex = -1;
-
-                LoadData();
             }
             catch (Exception ex)
             {
@@ -237,45 +227,45 @@ namespace SistemRentalPS
                     MessageBox.Show("Pilih data yang akan diupdate!");
                     return;
                 }
-
-                if (conn.State == ConnectionState.Closed)
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    //if (conn.State == ConnectionState.Closed)
                     conn.Open();
 
-                string queryP = @"UPDATE Pelanggan 
+                    string queryP = @"UPDATE Pelanggan 
                           SET nama_pelanggan = @nama, no_hp = @nohp 
                           WHERE id_pelanggan = (SELECT id_pelanggan FROM Transaksi WHERE id_transaksi = @id)";
-                SqlCommand cmdP = new SqlCommand(queryP, conn);
-                cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
-                cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
-                cmdP.Parameters.AddWithValue("@id", selectedId);
-                cmdP.ExecuteNonQuery();
+                    SqlCommand cmdP = new SqlCommand(queryP, conn);
+                    cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
+                    cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
+                    cmdP.Parameters.AddWithValue("@id", selectedId);
+                    cmdP.ExecuteNonQuery();
 
-                int id_unit = 1;
-                if (cmbUnit.Text == "PS3") id_unit = 1;
-                else if (cmbUnit.Text == "PS4") id_unit = 2;
-                else if (cmbUnit.Text == "PS5") id_unit = 3;
+                    int id_unit = (int)cmbUnit.SelectedValue;
 
-                using (SqlCommand cmdT = new SqlCommand("UPDATE Transaksi SET id_unit = @id_unit, jam_mulai = @jam_mulai, jam_selesai = @jam_selesai, total_bayar = @total_bayar WHERE id_transaksi = @id_transaksi", conn))
-                {
-                    cmdT.Parameters.AddWithValue("@id_transaksi", selectedId);
-                    cmdT.Parameters.AddWithValue("@id_unit", id_unit);
-                    cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
-                    cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
-                    cmdT.Parameters.AddWithValue("@total_bayar", txtTotal.Text == "" ? 0 : int.Parse(txtTotal.Text));
-                    cmdT.ExecuteNonQuery();
+                    using (SqlCommand cmdT = new SqlCommand("sp_UpdateTransaksi", conn))
+                    {
+                        cmdT.Parameters.AddWithValue("@id_transaksi", selectedId);
+                        cmdT.Parameters.AddWithValue("@id_unit", id_unit);
+                        cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
+                        cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
+                        cmdT.Parameters.AddWithValue("@total_bayar", txtTotal.Text == "" ? 0 : int.Parse(txtTotal.Text));
+                        cmdT.ExecuteNonQuery();
+                    }
                 }
 
-                MessageBox.Show("Data berhasil diupdate!");
-                conn.Close();
+                    MessageBox.Show("Data berhasil diupdate!");
+                    conn.Close();
 
-                LoadData();
+                    LoadData();
 
-                selectedId = "";
-                txtNama.Text = "";
-                txtNoHP.Text = "";
-                txtTotal.Text = "";
-                cmbUnit.SelectedIndex = -1;
-            }
+                    selectedId = "";
+                    txtNama.Text = "";
+                    txtNoHP.Text = "";
+                    txtTotal.Text = "";
+                    cmbUnit.SelectedIndex = -1;
+                }
+            
             catch (Exception ex)
             {
                 MessageBox.Show("Error Update: " + ex.Message);
@@ -303,19 +293,24 @@ namespace SistemRentalPS
                                 WHERE p.nama_pelanggan LIKE '%' + @search + '%'
                                 ORDER BY t.id_transaksi DESC";
 
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@search", txtSearch.Text);
-
-                SqlDataAdapter searchAdapter = new SqlDataAdapter(cmd);
-                DataTable searchDt = new DataTable();
-                searchAdapter.Fill(searchDt);
-
-                bindingSource1.DataSource = searchDt;
-                dgvTransaksi.DataSource = bindingSource1;
-
-                if (dgvTransaksi.Columns["id_transaksi"] != null)
+                using (SqlCommand cmdT = new SqlCommand("sp_SearchTransaksi", conn))
                 {
-                    dgvTransaksi.Columns["id_transaksi"].Visible = false;
+                    cmdT.CommandType = CommandType.StoredProcedure;
+                    cmdT.Parameters.AddWithValue("@search", txtSearch.Text);
+
+
+
+                    SqlDataAdapter searchAdapter = new SqlDataAdapter(cmdT);
+                    DataTable searchDt = new DataTable();
+                    searchAdapter.Fill(searchDt);
+
+                    bindingSource1.DataSource = searchDt;
+                    dgvTransaksi.DataSource = bindingSource1;
+
+                    if (dgvTransaksi.Columns["id_transaksi"] != null)
+                    {
+                        dgvTransaksi.Columns["id_transaksi"].Visible = false;
+                    }
                 }
 
                 conn.Close();
@@ -323,6 +318,22 @@ namespace SistemRentalPS
             catch (Exception ex)
             {
                 MessageBox.Show("Error Search: " + ex.Message);
+            }
+        }
+
+        private void LoadComboUnit()
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                string query = "SELECT id_unit, nama_unit FROM UnitPS WHERE status = 'Tersedia'";
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cmbUnit.DataSource = dt;
+                cmbUnit.DisplayMember = "nama_unit";
+                cmbUnit.ValueMember = "id_unit";
             }
         }
     }

@@ -42,7 +42,9 @@ namespace SistemRentalPS
 
         private void btnTransaksi_Click(object sender, EventArgs e)
         {
-            
+            Transaksi transaksi = new Transaksi();
+            transaksi.Show();
+            this.Hide();
         }
 
         private void btnLogout_Click(object sender, EventArgs e)
@@ -57,6 +59,26 @@ namespace SistemRentalPS
                 form1.Show();
                 this.Hide();
 
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Logout gagal : " + ex.Message);
+            }
+
+
+        }
+
+        private void btnKelola_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DataPS dataPS = new DataPS();
+                dataPS.Show();
+                this.Hide();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
             }
         }
     }

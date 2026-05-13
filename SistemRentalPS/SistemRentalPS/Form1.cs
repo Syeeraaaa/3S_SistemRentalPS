@@ -53,17 +53,14 @@ namespace SistemRentalPS
                 Koneksi();
                 conn.Open();
 
-                string query = "select nama_admin from admin where username = @user and password = @pass";
+                string query = "select count (*) from admin where username = @user and password = @pass";
                 cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@user", txtUsername.Text);
                 cmd.Parameters.AddWithValue("@pass", txtPass.Text);
 
-                if (txtUsername.Text == "" || txtPass.Text == "")
-                {
-                    MessageBox.Show("Login Gagal!, Password atau Username tidak boleh kosong");
+                int count = (int)cmd.ExecuteScalar();
 
-                }
-                else
+                if (count > 0)
                 {
                     MessageBox.Show("Login Berhasil!");
 
@@ -71,9 +68,16 @@ namespace SistemRentalPS
                     dasboard.Show();
                     this.Hide();
                 }
-            }catch (Exception ex)
+                else
+                {
+                    MessageBox.Show("Login Gagal!, Password atau Username salah!", "ERROR LOGIN!!!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    txtPass.Clear();
+                    txtUsername.Focus();
+                }
+            }
+            catch (Exception ex)
             {
-                MessageBox.Show("Login Gagal!, " + ex.Message);
+                MessageBox.Show("TERJADI KESALAHAN: " + ex.Message);
             }
 
 

@@ -54,7 +54,7 @@ namespace SistemRentalPS
 
                 string query = "SELECT * from vmLaporan WHERE tanggal BETWEEN @tglMulai AND @tglSampai";
 
-                cmd = new SqlCommand(query, conn);
+                SqlCommand cmd = new SqlCommand(query, conn);
 
                 cmd.Parameters.AddWithValue("@tglMulai", dtmDari.Value.Date);
                 cmd.Parameters.AddWithValue("@tglSampai", dtmSampai.Value.Date);
