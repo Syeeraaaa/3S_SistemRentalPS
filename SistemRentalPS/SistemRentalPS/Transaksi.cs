@@ -119,9 +119,14 @@ namespace SistemRentalPS
             {
                 using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    if (string.IsNullOrWhiteSpace(txtNama.Text))
+                    if (string.IsNullOrWhiteSpace(txtNama.Text) || txtNama.Text.Any(char.IsDigit))
                     {
                         MessageBox.Show("Nama harus diisi!");
+                        return;
+                    }
+                    if (string.IsNullOrWhiteSpace(txtNoHP.Text) || txtNoHP.Text.Any(char.IsLetter))
+                    {
+                        MessageBox.Show("No HP harus diisi, dan hanya boleh berisi ANGKA!");
                         return;
                     }
 
