@@ -53,14 +53,6 @@ namespace SistemRentalPS
         }
         private void dgvGamee_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
-
-                cmbPilihUnit.SelectedValue = row.Cells["id_unit"].Value.ToString();
-                txtNamaGame.Text = row.Cells["nama_game"].Value.ToString();
-                cmbGenre.Text = row.Cells["Genre"].Value.ToString();
-            }
 
         }
 
@@ -88,9 +80,9 @@ namespace SistemRentalPS
                         txtTipePS.Focus();
                         return;
                     }
-                    if (txtHargaJam.Text == "")
+                    if (txtHargaJam.Text == "" || txtHargaJam.Text.Any(char.IsLetter))
                     {
-                        MessageBox.Show("Harga/Jam harus diisi");
+                        MessageBox.Show("Harga/Jam harus diisi dengan Angka!!");
                         txtHargaJam.Focus();
                         return;
                     }
@@ -101,10 +93,10 @@ namespace SistemRentalPS
                         return;
                     }
 
-                    string query = @"INSERT INTO UnitPS
-                         (nama_unit,tipe_ps,harga_perjam,status)
-                         VALUES
-                         (@nama_unit,@tipe_ps,@harga_perjam,@status)";
+                    //string query = @"INSERT INTO UnitPS
+                         //(nama_unit,tipe_ps,harga_perjam,status)
+                         //VALUES
+                         //(@nama_unit,@tipe_ps,@harga_perjam,@status)";
                     using (SqlCommand cmd = new SqlCommand("sp_InsertUnitPS", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -112,18 +104,19 @@ namespace SistemRentalPS
                         cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
                         cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
                         cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-                    }
-                    int result = cmd.ExecuteNonQuery();
 
-                    if (result > 0)
-                    {
-                        MessageBox.Show("Data Unit PS berhasil ditambahkan");
-                        ClearForm();
-                        LoadData();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data gagal ditambahkan");
+                        int result = cmd.ExecuteNonQuery();
+
+                        if (result < 0)
+                        {
+                            MessageBox.Show("Data gagal ditambahkan");
+                            ClearForm();
+                            LoadData();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Data Berhasil ditambahkan ditambahkan");
+                        }
                     }
                 }
             }
@@ -182,7 +175,7 @@ namespace SistemRentalPS
 
                         int result = cmd.ExecuteNonQuery();
 
-                        if (result < 0)
+                        if (result > 0)
                         {
                             MessageBox.Show("Data Unit PS berhasil diupdate");
                             ClearForm();
@@ -341,7 +334,7 @@ namespace SistemRentalPS
                                 SET 
                                     id_unit = @id_unit,
                                     nama_game = @nama_game,
-                                    genre = @genre
+                                   genre = @genre
                                 WHERE id_game = @id_game";
                     using (SqlCommand cmd = new SqlCommand("sp_UpdateGamePS", conn))
                     {
@@ -358,7 +351,7 @@ namespace SistemRentalPS
                         {
                             MessageBox.Show("Data Unit PS berhasil diupdate");
                             ClearForm();
-                            btnTampilkanGame.PerformClick();
+                            btnTampilGame.PerformClick();
                         }
                         else
                         {
@@ -408,7 +401,7 @@ namespace SistemRentalPS
                                 MessageBox.Show("Data Unit PS berhasil dihapus");
                                 ClearForm();
                                 //btnHapus.PerformClick();
-                                btnTampilkanGame_Click(sender, e);
+                                btnTampilGame_Click(sender, e);
                             }
                             else
                             {
@@ -506,6 +499,10 @@ namespace SistemRentalPS
 
         private void DataPS_Load(object sender, EventArgs e)
         {
+            // TODO: This line of code loads data into the 'sistemRental_PSDataSet2.Game' table. You can move, or remove it, as needed.
+            this.gameTableAdapter.Fill(this.sistemRental_PSDataSet2.Game);
+            // TODO: This line of code loads data into the 'sistemRental_PSDataSet.UnitPS' table. You can move, or remove it, as needed.
+            this.unitPSTableAdapter.Fill(this.sistemRental_PSDataSet.UnitPS);
             cmbStatus.DataSource = new string[] { "Tersedia", "Dipakai", "Maintenance" };
 
             dgvUnit.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
