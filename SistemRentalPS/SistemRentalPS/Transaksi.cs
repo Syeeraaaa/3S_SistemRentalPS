@@ -25,7 +25,21 @@ namespace SistemRentalPS
 
             
         }
+        private void simpanLog(string pesan)
+        {
+            using(SqlConnection conn = new SqlConnection(connString))
+            {
+                string query = @"insert into LogError values(getdate(), @pesan)";
 
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@pesan", pesan);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
         private void LoadData()
         {
             try
@@ -247,18 +261,7 @@ namespace SistemRentalPS
 
                 using (SqlConnection conn = new SqlConnection(connString))
                 {
-                    //if (conn.State == ConnectionState.Closed)
                     conn.Open();
-
-                    //string queryP = @"UPDATE Pelanggan 
-                    //      SET nama_pelanggan = @nama, no_hp = @nohp 
-                    //      WHERE id_pelanggan = (SELECT id_pelanggan FROM Transaksi WHERE id_transaksi = @id)";
-                    //SqlCommand cmdP = new SqlCommand(queryP, conn);
-                    //cmdP.Parameters.AddWithValue("@nama", txtNama.Text);
-                    //cmdP.Parameters.AddWithValue("@nohp", txtNoHP.Text);
-                    //cmdP.Parameters.AddWithValue("@id", selectedId);
-                    //cmdP.ExecuteNonQuery();
-
                     int id_unit = (int)cmbUnit.SelectedValue;
 
                     using (SqlCommand cmdT = new SqlCommand("sp_UpdateTransaksi", conn))
@@ -318,22 +321,6 @@ namespace SistemRentalPS
                     }
 
                 }
-                //if (conn.State == ConnectionState.Closed)
-                //    conn.Open();
-
-                //string query = @"SELECT 
-                //                    t.id_transaksi,
-                //                    p.nama_pelanggan AS 'Nama Pelanggan',
-                //                    p.no_hp AS 'No HP',
-                //                    u.nama_unit AS 'Unit',
-                //                    t.jam_mulai AS 'Jam Mulai',
-                //                    t.jam_selesai AS 'Jam Selesai',
-                //                    t.total_bayar AS 'Total Bayar'
-                //                FROM Transaksi t
-                //                JOIN Pelanggan p ON t.id_pelanggan = p.id_pelanggan
-                //                JOIN UnitPS u ON t.id_unit = u.id_unit
-                //                WHERE p.nama_pelanggan LIKE '%' + @search + '%'
-                //                ORDER BY t.id_transaksi DESC";
 
             }
             catch (Exception ex)
@@ -375,23 +362,7 @@ namespace SistemRentalPS
                 cmbTipePS.ValueMember = "tipe_ps";
                 cmbTipePS.SelectedIndex = -1;
             }
-        }
-        private void txtNama_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label8_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void cmbTipePS_SelectedIndexChanged(object sender, EventArgs e)
+        }private void cmbTipePS_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmbTipePS.SelectedIndex == -1) return;
             string tipe = cmbTipePS.SelectedValue.ToString();
