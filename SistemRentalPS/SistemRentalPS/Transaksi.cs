@@ -205,14 +205,7 @@ namespace SistemRentalPS
                          cmdT.ExecuteNonQuery();
                      }
 
-                    // string queryStatus = "Update UnitPS Set status = 'Sedang digunakan' where id_unit = @id_unit";
-                     //SqlCommand CmdStatus = new SqlCommand(queryStatus, conn);
-                     //CmdStatus.Parameters.AddWithValue("@id_unit", id_unit);
-                     //CmdStatus.ExecuteNonQuery();
-
                          MessageBox.Show("Data berhasil disimpan!");
-                     //conn.Close();
-                     //
                      txtNama.Text = "";
                      txtNoHP.Text = "";
                      txtTotal.Text = "";
@@ -223,8 +216,14 @@ namespace SistemRentalPS
                      LoadData();
                  }
              }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
               catch (Exception ex)
               {
+                simpanLog(ex.Message);
                   MessageBox.Show("Error Simpan: " + ex.Message);
               }
         }
