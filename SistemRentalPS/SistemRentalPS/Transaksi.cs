@@ -214,24 +214,6 @@ namespace SistemRentalPS
                   MessageBox.Show("Error Simpan: " + ex.Message);
               }
         }
-
-        private void dgvTransaksi_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (dgvTransaksi.SelectedRows.Count > 0)
-            {
-                DataGridViewRow row = dgvTransaksi.SelectedRows[0];
-
-                selectedId = row.Cells[0].Value.ToString();
-                txtNama.Text = row.Cells[1].Value.ToString();
-                txtNoHP.Text = row.Cells[2].Value.ToString();
-                cmbTipePS.Text = row.Cells[3].Value.ToString();
-                cmbUnit.Text = row.Cells[4].Value.ToString();
-                dtMulai.Text = row.Cells[5].Value.ToString();
-                dtSelesai.Text = row.Cells[6].Value.ToString();
-                txtTotal.Text = row.Cells[7].Value.ToString();
-            }
-        }
-
         private void dgvTransaksi_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvTransaksi.SelectedRows.Count > 0)
@@ -241,34 +223,17 @@ namespace SistemRentalPS
                 selectedId = row.Cells["id_transaksi"].Value.ToString();
                 txtNama.Text = row.Cells["Nama Pelanggan"].Value.ToString();
                 txtNoHP.Text = row.Cells["No HP"].Value.ToString();
-                cmbTipePS.Text = row.Cells["Tipe PS"].Value.ToString();
-                cmbUnit.Text = row.Cells["Unit"].Value.ToString();
                 dtMulai.Text = row.Cells["Jam Mulai"].Value.ToString();
                 dtSelesai.Text = row.Cells["Jam Selesai"].Value.ToString();
                 txtTotal.Text = row.Cells["Total Bayar"].Value.ToString();
+
+                string tipe = row.Cells["Tipe PS"].Value.ToString();
+                cmbTipePS.SelectedValue = tipe;
+
+                LoadComboUnit(tipe);
+                cmbUnit.Text = row.Cells["Unit"].Value.ToString();
             }
         }
-
-        private void dtMulai_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void txtNoHP_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void txtNama_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            
-        }
-
-        private void txtNoHP_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            
-        }
-
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (selectedId == "")
@@ -335,7 +300,7 @@ namespace SistemRentalPS
                     using (SqlCommand cmdT = new SqlCommand("sp_SearchTransaksi", conn))
                     {
                         cmdT.CommandType = CommandType.StoredProcedure;
-                        cmdT.Parameters.AddWithValue("@search", txtSearch.Text);
+                        cmdT.Parameters.AddWithValue("@nama", txtSearch.Text);
 
 
 
