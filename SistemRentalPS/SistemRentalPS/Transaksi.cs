@@ -288,8 +288,14 @@ namespace SistemRentalPS
                 cmbUnit.SelectedIndex = -1;
 
             }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
             catch (Exception ex)
             {
+                simpanLog(ex.Message);
                 MessageBox.Show("Error Update: " + ex.Message);
             }
         }
