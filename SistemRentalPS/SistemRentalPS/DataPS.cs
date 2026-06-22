@@ -59,36 +59,35 @@ namespace SistemRentalPS
         // ------------------------
         private void btnTambah_Click_1(object sender, EventArgs e)
         {
-                try
-                {
+            if (string.IsNullOrWhiteSpace(txtNamaUnit.Text))
+            {
+                MessageBox.Show("Nama Unit harus diisi");
+                txtNamaUnit.Focus();
+                return;
+            }
+            if (txtTipePS.Text == "")
+            {
+                MessageBox.Show("Tipe PS harus diisi");
+                txtTipePS.Focus();
+                return;
+            }
+            if (txtHargaJam.Text == "" || txtHargaJam.Text.Any(char.IsLetter))
+            {
+                MessageBox.Show("Harga/Jam harus diisi dengan Angka!!");
+                txtHargaJam.Focus();
+                return;
+            }
+            if (cmbStatus.Text == "")
+            {
+                MessageBox.Show("Status harus diisi");
+                cmbStatus.Focus();
+                return;
+            }
+            try
+            {
                 using (SqlConnection conn = Koneksi())
                 {
                     conn.Open();
-                 
-                    if (string.IsNullOrWhiteSpace(txtNamaUnit.Text))
-                    {
-                        MessageBox.Show("Nama Unit harus diisi");
-                        txtNamaUnit.Focus();
-                        return;
-                    }
-                    if (txtTipePS.Text == "")
-                    {
-                        MessageBox.Show("Tipe PS harus diisi");
-                        txtTipePS.Focus();
-                        return;
-                    }
-                    if (txtHargaJam.Text == "" || txtHargaJam.Text.Any(char.IsLetter))
-                    {
-                        MessageBox.Show("Harga/Jam harus diisi dengan Angka!!");
-                        txtHargaJam.Focus();
-                        return;
-                    }
-                    if (cmbStatus.Text == "")
-                    {
-                        MessageBox.Show("Status harus diisi");
-                        cmbStatus.Focus();
-                        return;
-                    }
                     using (SqlCommand cmd = new SqlCommand("sp_InsertUnitPS", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -99,15 +98,15 @@ namespace SistemRentalPS
 
                         int result = cmd.ExecuteNonQuery();
 
-                        if (result > 0)
+                        if (result < 0)
                         {
-                            MessageBox.Show("Data Berhasil ditambahkan");
+                            MessageBox.Show("Data Unit PS Berhasil ditambahkan");
                             ClearForm();
                             LoadData();
                         }
                         else
                         {
-                            MessageBox.Show("Data Gagal ditambahkan");
+                            MessageBox.Show("Data Gagal ditambahkan!");
                         }
                     }
                 }
@@ -122,37 +121,35 @@ namespace SistemRentalPS
         // ------------------------
         private void btnUpdate_Click_1(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(id_unit))
+            {
+                MessageBox.Show("Klik baris data yang ingin diupdate!");
+                return;
+            }
             try
             {
                 using (SqlConnection conn = Koneksi())
                 {
-
-                    //Koneksi();
                     
                     conn.Open();
-                    if (string.IsNullOrEmpty(id_unit))
-                    {
-                        MessageBox.Show("Klik pada bagian baris yang ingin diupdate!");
-                        return;
-                    }
+
                     using (SqlCommand cmd = new SqlCommand("sp_UpdateUnitPS", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        //cmd.Parameters.AddWithValue("@id_unit", txtIDUnit.Text);
+                        cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
                         cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
                         cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
                         cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
                         cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-                        cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
+                       
 
                         int result = cmd.ExecuteNonQuery();
 
-                        if (result > 0)
+                        if (result < 0)
                         {
                             MessageBox.Show("Data Unit PS berhasil diupdate");
                             ClearForm();
                             LoadData();
-                            id_unit = "";
                         }
                         else
                         {
@@ -172,59 +169,58 @@ namespace SistemRentalPS
         // ------------------------
         private void btnHapus_Click_1(object sender, EventArgs e)
         {
-            try
+            if (string.IsNullOrEmpty(id_unit))
             {
-                using (SqlConnection conn = Koneksi())
+                MessageBox.Show("Pilih data yang ingin dihapus!!");
+            }
+            DialogResult confirm = MessageBox.Show(
+                "Yaking ingin menghapus unit ini?? Data transaksi terkait juga akan terhapus!",
+                "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+                );
+            if (confirm == DialogResult.Yes)
+            {
+                try
                 {
-                    conn.Open();
-                    if (string.IsNullOrEmpty(id_unit))
+                    using (SqlConnection conn = Koneksi())
                     {
-                        MessageBox.Show("Pilih data dulu!");
-                        return;
-                    }
+                        conn.Open();
 
-                    DialogResult resultConfirm = MessageBox.Show(
-                        "Apakah anda yakin menghapus data ini?",
-                        "Konfirmasi",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question);
-
-                    if (resultConfirm == DialogResult.Yes)
-                    {
-                        string deleteGame = "DELETE FROM Game WHERE id_unit = @id_unit";
+                        string deleteGame = "Delete from Game where id_unit = @id_unit";
                         SqlCommand cmdGame = new SqlCommand(deleteGame, conn);
-                        cmdGame.Parameters.AddWithValue("@id_unit", id_unit);
+                        cmdGame.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
                         cmdGame.ExecuteNonQuery();
 
-                        //string query = "DELETE FROM UnitPS WHERE id_unit = @id_unit";
+                        string deleteTransaksi = "delete form Transaksi where id-unit = @id_unit";
+                        SqlCommand cmdTransaksi = new SqlCommand(deleteTransaksi, conn);
+                        cmdTransaksi.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
+                        cmdTransaksi.ExecuteNonQuery();
 
-                        using (SqlCommand cmd = new SqlCommand("sp_DeleteUnitPS", conn))
+                        using (SqlCommand cmd = new SqlCommand("sp_deleteUnitPS", conn))
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
+                            cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit);
 
                             int result = cmd.ExecuteNonQuery();
-
-                            if (result > 0)
+                            if (result < 0)
                             {
-                                MessageBox.Show("Data Unit PS berhasil dihapus");
+                                MessageBox.Show("Data Unit PS Berhasil dihapus!");
                                 ClearForm();
-                                //btnTampilkanUnit.PerformClick();
                                 LoadData();
-                                id_unit = "";
                             }
                             else
                             {
-                                MessageBox.Show("Data gagal dihapus");
+                                MessageBox.Show("Data gagal dihapus!!");
                             }
                         }
+
                     }
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
-            }
+
         }
 
         private void dgvUnit_CellContentClick(object sender, DataGridViewCellEventArgs e)
