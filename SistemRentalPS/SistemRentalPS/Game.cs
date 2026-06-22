@@ -312,5 +312,15 @@ namespace SistemRentalPS
 
             LoadComboUnit();
         }
+
+        private void cmb_Tipe_PS_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmb_Tipe_PS.SelectedIndex == -1)
+            {
+                cmbPilihUnit.DataSource = null;
+                return;
+            }
+            LoadComboUnitByTipe(cmb_Tipe_PS.SelectedValue.ToString());
+        }
     }
 }
