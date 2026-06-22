@@ -42,53 +42,50 @@ namespace SistemRentalPS
                 DataGridViewRow row = dgvGamee.Rows[e.RowIndex];
 
                 id_game = row.Cells["id_game"].Value.ToString();
-                cmbPilihUnit.SelectedValue = row.Cells["id_unit"].Value;
-                txtNamaGame.Text = row.Cells["nama_game"].Value.ToString();
-                cmbGenre.Text = row.Cells["genre"].Value.ToString();
+                cmb_Tipe_PS.SelectedValue = row.Cells["Tipe PS"].Value.ToString();
+                if (cmbPilihUnit.DataSource != null)
+                {
+                    cmbPilihUnit.SelectedValue = row.Cells["id_unit"].Value;
+                }
+                txtNamaGame.Text = row.Cells["Nama Game"].Value.ToString();
+                cmbGenre.Text = row.Cells["Genre"].Value.ToString();
 
             }
         }
 
         private void btnTambahGame_Click(object sender, EventArgs e)
         {
+            if (cmb_Tipe_PS.SelectedIndex == -1)
+            {
+                MessageBox.Show("Pilih Tipe PS terlebih dahulu!");
+                return;
+            }
+            if (cmbPilihUnit.SelectedValue == null)
+            {
+                MessageBox.Show("Pilih Unit terlebih dahulu!");
+                cmbPilihUnit.Focus();
+                return;
+            }
+            if (txtNamaGame.Text == "")
+            {
+                MessageBox.Show("Nama Game harus diisi");
+                txtNamaGame.Focus();
+                return;
+            }
+            if (cmbGenre.Text == "")
+            {
+                MessageBox.Show("Pilih Genre Game terlebih dahulu!!");
+                cmbGenre.Focus();
+                return;
+            }
             try
             {
                 using (SqlConnection conn = Koneksi())
                 {
-
-
-                    if (conn.State == System.Data.ConnectionState.Closed)
-                    {
-                        conn.Open();
-                    }
-                    if (txtNamaGame.Text == "")
-                    {
-                        MessageBox.Show("Nama Game harus diisi");
-                        txtNamaGame.Focus();
-                        return;
-                    }
-                    if (cmbPilihUnit.SelectedValue == null)
-                    {
-                        MessageBox.Show("Pilih Unit terlebih dahulu!");
-                        cmbPilihUnit.Focus();
-                        return;
-                    }
-                    if (cmbGenre.Text == "")
-                    {
-                        MessageBox.Show("Pilih Genre Game terlebih dahulu!!");
-                        cmbGenre.Focus();
-                        return;
-                    }
-
-                    //string query = @"INSERT INTO Game
-                    //(id_unit,nama_game,genre)
-                    //VALUES
-                    //(@id_unit,@nama_game,@genre)";
+                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("sp_InsertGamePS", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Clear();
-
                         cmd.Parameters.AddWithValue("@id_unit", cmbPilihUnit.SelectedValue);
                         cmd.Parameters.AddWithValue("@nama_game", txtNamaGame.Text);
                         cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
@@ -110,29 +107,37 @@ namespace SistemRentalPS
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+                MessageBox.Show(ex.Message);
             }
         }
 
         private void btnUpdateGame_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(id_game))
+            {
+                MessageBox.Show("Pilih data game yang akan diupdate!");
+                return;
+            }
+            if (cmbPilihUnit.SelectedIndex == -1)
+            {
+                MessageBox.Show("Pilih Unit terlebih dahulu!");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtNamaGame.Text))
+            {
+                MessageBox.Show("Nama Game harus diisi!");
+                return;
+            }
+            if (cmbGenre.SelectedIndex == -1)
+            {
+                MessageBox.Show("Pilih Genre terebih dahulu!");
+                return;
+            }
             try
             {
                 using (SqlConnection conn = Koneksi())
                 {
-
-
-                    if (conn.State == System.Data.ConnectionState.Closed)
-                    {
-                        conn.Open();
-                    }
-
-                    //string query = @"UPDATE Game
-                    //SET 
-                    //id_unit = @id_unit,
-                    //nama_game = @nama_game,
-                    //genre = @genre
-                    //WHERE id_game = @id_game";
+                    conn.Open();
                     using (SqlCommand cmd = new SqlCommand("sp_UpdateGamePS", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -142,13 +147,13 @@ namespace SistemRentalPS
                         cmd.Parameters.AddWithValue("@genre", cmbGenre.Text);
 
                         int result = cmd.ExecuteNonQuery();
-                        //MessageBox.Show("Rows affected: " + result);
 
                         if (result < 0)
                         {
                             MessageBox.Show("Data Unit PS berhasil diupdate");
                             ClearForm();
                             btnTampilGame.PerformClick();
+                            
                         }
                         else
                         {
@@ -166,31 +171,28 @@ namespace SistemRentalPS
 
         private void btnHapusGame_Click(object sender, EventArgs e)
         {
-            try
+            if (string.IsNullOrEmpty(id_game))
             {
-                using (SqlConnection conn = Koneksi())
+                MessageBox.Show("Piih data Game yang akan dihapus!");
+                return;
+            }
+            DialogResult resultConfirm = MessageBox.Show(
+             "Apakah anda yakin menghapus data ini?",
+             "Konfirmasi",
+             MessageBoxButtons.YesNo,
+             MessageBoxIcon.Question);
+
+            if (resultConfirm == DialogResult.Yes)
+            {
+                
+                try
                 {
-                    conn.Open();
-
-                    //if (conn.State == System.Data.ConnectionState.Closed)
-                    //{
-                    //conn.Open();
-                    //}
-
-                    DialogResult resultConfirm = MessageBox.Show(
-                        "Apakah anda yakin menghapus data ini?",
-                        "Konfirmasi",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question);
-
-                    if (resultConfirm == DialogResult.Yes)
+                    using (SqlConnection conn = Koneksi())
                     {
-                        //string query = "DELETE FROM Game WHERE id_game = @id_game";
-
+                        conn.Open();
                         using (SqlCommand cmd = new SqlCommand("sp_DeleteGamePS", conn))
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
-                            //cmd.Parameters.AddWithValue("@id_game", cmbPilihUnit.SelectedValue);
                             cmd.Parameters.AddWithValue("@id_game", id_game);
 
                             int result = cmd.ExecuteNonQuery();
@@ -199,8 +201,8 @@ namespace SistemRentalPS
                             {
                                 MessageBox.Show("Data Unit PS berhasil dihapus");
                                 ClearForm();
-                                //btnHapus.PerformClick();
-                                btnTampilGame_Click(sender, e);
+                                btnTampilGame.PerformClick();
+                               
                             }
                             else
                             {
@@ -209,10 +211,10 @@ namespace SistemRentalPS
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+                }
             }
         }
 
@@ -222,26 +224,13 @@ namespace SistemRentalPS
             {
                 using (SqlConnection conn = Koneksi())
                 {
-
-
-                    //Koneksi();
                     conn.Open();
-
-                    string query = @"
-                            SELECT 
-                                g.id_game,
-                                g.id_unit,
-                                u.nama_unit,
-                                g.nama_game,
-                                g.genre
-                            FROM Game g
-                            LEFT JOIN UnitPS u ON g.id_unit = u.id_unit
-                            ";
-                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    using (SqlCommand cmd = new SqlCommand("sp_GetGameByFilter", conn))
                     {
-                        // SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                        cmd.CommandType = CommandType.StoredProcedure;
 
                         DataTable dt = new DataTable();
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
                         da.Fill(dt);
 
                         dgvGamee.DataSource = dt;
@@ -253,29 +242,6 @@ namespace SistemRentalPS
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
             }
         }
-
-        private void LoadData()
-        {
-            using (SqlConnection conn = Koneksi())
-            {
-                using (SqlCommand cmd = new SqlCommand("sp_GetUnit", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        dt = new DataTable();
-                        da.Fill(dt);
-
-                        bindingSource.DataSource = dt;
-                        dgvUnit.DataSource = bindingSource;
-
-                        BindControls();
-                    }
-                }
-            }
-        }
-
         private void LoadComboUnit()
         {
 
@@ -296,10 +262,11 @@ namespace SistemRentalPS
         }
         private void ClearForm()
         {
+            id_game = "";
+            txtNamaGame.Clear();
+            cmb_Tipe_PS.SelectedIndex = -1;
+            cmbPilihUnit.DataSource = null;
             cmbGenre.SelectedIndex = -1;
-            cmbPilihUnit.SelectedIndex = -1;
-            cmb_Tipe_PS.SelectedIndex = = -1;
-            txtNamaGame.Focus();
         }
 
         private void Game_Load(object sender, EventArgs e)
