@@ -39,6 +39,7 @@ namespace SistemRentalPS
 
         private void ClearForm()
         {
+            id_unit = "";
             txtNamaUnit.Clear();
             txtTipePS.Clear();
             txtHargaJam.Clear();
@@ -233,10 +234,10 @@ namespace SistemRentalPS
                 DataGridViewRow row = dgvUnit.Rows[e.RowIndex];
 
                 id_unit = row.Cells["id_unit"].Value.ToString();
-                txtNamaUnit.Text = row.Cells[1].Value.ToString();
-                txtTipePS.Text = row.Cells["tipe_ps"].Value.ToString();
-                txtHargaJam.Text = row.Cells["harga_perjam"].Value.ToString();
-                cmbStatus.Text = row.Cells["status"].Value.ToString();
+                //txtNamaUnit.Text = row.Cells[1].Value.ToString();
+                //txtTipePS.Text = row.Cells["tipe_ps"].Value.ToString();
+                //txtHargaJam.Text = row.Cells["harga_perjam"].Value.ToString();
+                //cmbStatus.Text = row.Cells["status"].Value.ToString();
 
             }
 
@@ -251,10 +252,6 @@ namespace SistemRentalPS
 
         private void DataPS_Load(object sender, EventArgs e)
         {
-            // TODO: This line of code loads data into the 'sistemRental_PSDataSet2.Game' table. You can move, or remove it, as needed.
-            this.gameTableAdapter.Fill(this.sistemRental_PSDataSet2.Game);
-            // TODO: This line of code loads data into the 'sistemRental_PSDataSet.UnitPS' table. You can move, or remove it, as needed.
-            this.unitPSTableAdapter.Fill(this.sistemRental_PSDataSet.UnitPS);
             cmbStatus.DataSource = new string[] { "Tersedia", "Dipakai", "Maintenance" };
 
             dgvUnit.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
