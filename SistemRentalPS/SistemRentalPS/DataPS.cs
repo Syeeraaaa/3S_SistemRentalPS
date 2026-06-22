@@ -190,7 +190,7 @@ namespace SistemRentalPS
                         cmdGame.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
                         cmdGame.ExecuteNonQuery();
 
-                        string deleteTransaksi = "delete form Transaksi where id-unit = @id_unit";
+                        string deleteTransaksi = "delete from Transaksi where id_unit = @id_unit";
                         SqlCommand cmdTransaksi = new SqlCommand(deleteTransaksi, conn);
                         cmdTransaksi.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
                         cmdTransaksi.ExecuteNonQuery();
@@ -198,7 +198,7 @@ namespace SistemRentalPS
                         using (SqlCommand cmd = new SqlCommand("sp_deleteUnitPS", conn))
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit);
+                            cmd.Parameters.AddWithValue("@id_unit", int.Parse(id_unit));
 
                             int result = cmd.ExecuteNonQuery();
                             if (result < 0)
@@ -365,6 +365,13 @@ namespace SistemRentalPS
         private void unitPSBindingSource_CurrentChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void keloaDataGameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Game frmGame = new Game();
+            frmGame.Show();
+            this.Hide();
         }
     }
 }
