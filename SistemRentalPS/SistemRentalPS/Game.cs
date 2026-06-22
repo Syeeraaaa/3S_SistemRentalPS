@@ -322,5 +322,27 @@ namespace SistemRentalPS
             }
             LoadComboUnitByTipe(cmb_Tipe_PS.SelectedValue.ToString());
         }
+
+       private void LoadComboUnitByTipe(string tipe)
+        {
+            using (SqlConnection conn = Koneksi())
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand("sp_GetUnitByTipe", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@tipe_ps", tipe);
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    cmbPilihUnit.DataSource = dt;
+                    cmbPilihUnit.DisplayMember = "nama_unit";
+                    cmbPilihUnit.ValueMember = "id_unit";
+                    cmbPilihUnit.SelectedIndex = -1;
+                }
+            }
+        }
     }
 }
