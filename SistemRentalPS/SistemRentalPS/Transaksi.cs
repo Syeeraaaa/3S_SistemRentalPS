@@ -185,11 +185,14 @@ namespace SistemRentalPS
               MessageBox.Show("Klik tombol Mulai untuk menghitung");
               return;
           }
-             try
+           
+            SqlTransaction trans = conn.BeginTransaction();
+            try
              {
                  using (SqlConnection conn = new SqlConnection(connString))
                  {
                          conn.Open();
+                    
 
                      int id_unit = (int)cmbUnit.SelectedValue;
 
@@ -203,9 +206,18 @@ namespace SistemRentalPS
                          cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
                          cmdT.Parameters.AddWithValue("@total_bayar",int.Parse(txtTotal.Text));
                          cmdT.ExecuteNonQuery();
-                     }
 
-                         MessageBox.Show("Data berhasil disimpan!");
+                        
+                     }
+                    SqlCommand cmdLog = new SqlCommand(
+                           @"insert into LogAktivitasSalah (aktivitas, waktu) values (@aktivitas, GETDATE())", conn, trans);
+
+                    cmdLog.Parameters.AddWithValue("@aktivitas", "INSERT TRANSAKSI: " + txtNama.Text);
+                    cmdLog.ExecuteNonQuery();
+
+                    trans.Commit();
+
+                    MessageBox.Show("Data berhasil disimpan!");
                      txtNama.Text = "";
                      txtNoHP.Text = "";
                      txtTotal.Text = "";
@@ -218,14 +230,21 @@ namespace SistemRentalPS
              }
             catch (SqlException ex)
             {
-                simpanLog(ex.Message);
-                MessageBox.Show("SQL ERROR: " + ex.Message);
+                trans.Rollback();
+
+                simpanLog("ROLLBACK INSERT : "+ ex.Message);
+                MessageBox.Show("SQL ERROR : "+ex.Message);
             }
-              catch (Exception ex)
-              {
-                simpanLog(ex.Message);
-                  MessageBox.Show("Error Simpan: " + ex.Message);
-              }
+            catch (Exception ex)
+            {
+                trans.Rollback();
+                simpanLog("GENERAL ERROR: "+ex.Message);
+                MessageBox.Show("ERROR SIMPAN: "+ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
         private void dgvTransaksi_SelectionChanged(object sender, EventArgs e)
         {
@@ -254,7 +273,26 @@ namespace SistemRentalPS
                 MessageBox.Show("Pilih data yang akan diupdate!");
                 return;
             }
-
+            if (string.IsNullOrWhiteSpace(txtNama.Text) || txtNama.Text.Any(char.IsDigit))
+            {
+                MessageBox.Show("Nama harus diisi dan tidak boleh mengandung ANGKA!!");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtNoHP.Text) || txtNoHP.Text.Any(char.IsLetter))
+            {
+                MessageBox.Show("No HP harus diisi dan Hanya boleh berisi ANGKA!");
+                return;
+            }
+            if (cmbUnit.SelectedIndex == -1)
+            {
+                MessageBox.Show("Pilih Unit terlebih dahulu!");
+                return;
+            }
+            if (dtSelesai.Value <= dtMulai.Value)
+            {
+                MessageBox.Show("Jam selesai harus lebih besar dari jam mulai!");
+                return;
+            }
             try
             {
 
