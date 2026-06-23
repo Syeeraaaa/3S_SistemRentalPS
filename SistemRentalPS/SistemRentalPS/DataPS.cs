@@ -271,8 +271,14 @@ namespace SistemRentalPS
 
                     }
                 }
+                catch (SqlException ex)
+                {
+                    simpanLogPS(ex.Message);
+                    MessageBox.Show("SQL ERROR:  " + ex.Message);
+                }
                 catch (Exception ex)
                 {
+                    simpanLogPS(ex.Message);
                     MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
                 }
             }
