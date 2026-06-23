@@ -34,7 +34,21 @@ namespace SistemRentalPS
             InitializeComponent();
         }
 
+        private void simpanLog(string pesan)
+        {
+            using (SqlConnection conn = Koneksi())
+            {
+                string query = @"insert into LogError values(GETDATE(), @pesan)";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@pesan", pesan);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
 
+            }
+            
+        }
         private void dgvGamee_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -52,6 +66,7 @@ namespace SistemRentalPS
 
             }
         }
+
 
         private void btnTambahGame_Click(object sender, EventArgs e)
         {
@@ -104,6 +119,11 @@ namespace SistemRentalPS
                         }
                     }
                 }
+            }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show(ex.Message);
             }
             catch (Exception ex)
             {
@@ -310,6 +330,13 @@ namespace SistemRentalPS
                     cmbPilihUnit.SelectedIndex = -1;
                 }
             }
+        }
+
+        private void dashboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Dashboardcs fdashboard = new Dashboardcs();
+            fdashboard.Show();
+            this.Hide();
         }
     }
 }
