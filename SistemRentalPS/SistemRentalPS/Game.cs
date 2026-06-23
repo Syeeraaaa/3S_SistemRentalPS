@@ -123,11 +123,12 @@ namespace SistemRentalPS
             catch (SqlException ex)
             {
                 simpanLog(ex.Message);
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("SQL ERROR: " +ex.Message);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                simpanLog(ex.Message);
+                MessageBox.Show("gENERAL ERROR: "+ ex.Message);
             }
         }
 
