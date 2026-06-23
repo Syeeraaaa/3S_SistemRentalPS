@@ -404,17 +404,18 @@ namespace SistemRentalPS
             {
                 using (SqlConnection conn = Koneksi())
                 {
-                    conn.Open();
+                    
 
                     string query =
-                        "UPDATE UnitPS SET nama_unit='HACKED' WHERE tipe_ps='" +
+                        "UPDATE UnitPS SET nama_unit='" + txtNamaUnit.Text +"' WHERE tipe_ps='" +
                         txtTipePS.Text + "'";
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        int result = cmd.ExecuteNonQuery();
-                        MessageBox.Show(result + " baris terupdate");
-                    }
+                    SqlCommand cmd = new SqlCommand(query, conn);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Update Berhasil");
+                    
                 }
                 LoadData();
             }
