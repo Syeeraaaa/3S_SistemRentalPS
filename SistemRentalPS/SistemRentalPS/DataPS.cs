@@ -35,6 +35,20 @@ namespace SistemRentalPS
             InitializeComponent();
         }
 
+        private void simpanLogPS(string pesan)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"insert into LogError values(getdate(), @pesan)";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Pesan", pesan);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
 
 
         private void ClearForm()
@@ -126,6 +140,26 @@ namespace SistemRentalPS
                 MessageBox.Show("Klik baris data yang ingin diupdate!");
                 return;
             }
+            if (string.IsNullOrWhiteSpace(txtNamaUnit.Text))
+            {
+                MessageBox.Show("Nama Unit harus diisi!");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtTipePS.Text))
+            {
+                MessageBox.Show("Tipe PS harus diisi!");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtHargaJam.Text) || txtHargaJam.Text.Any(char.IsLetter))
+            {
+                MessageBox.Show("Harga/Jam harus diisi dengan angka!");
+                return;
+            }
+            if (cmbStatus.SelectedIndex == -1)
+            {
+                MessageBox.Show("Setatus harus dipilih!");
+                return;
+            }
             try
             {
                 using (SqlConnection conn = Koneksi())
@@ -172,6 +206,7 @@ namespace SistemRentalPS
             if (string.IsNullOrEmpty(id_unit))
             {
                 MessageBox.Show("Pilih data yang ingin dihapus!!");
+                return;
             }
             DialogResult confirm = MessageBox.Show(
                 "Yaking ingin menghapus unit ini?? Data transaksi terkait juga akan terhapus!",
