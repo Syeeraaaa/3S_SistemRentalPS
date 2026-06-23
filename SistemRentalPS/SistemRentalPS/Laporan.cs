@@ -81,6 +81,7 @@ namespace SistemRentalPS
             }
             catch (Exception ex)
             {
+
                 MessageBox.Show(ex.Message);
             }
          
@@ -240,6 +241,7 @@ namespace SistemRentalPS
                         return;
 
                     }
+                    btnCetak.Enabled = false;
                 }
             }
             catch (Exception ex)
@@ -259,6 +261,19 @@ namespace SistemRentalPS
         {
             
         }
-        
+
+        private void btnCetak_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.Rows.Count == 0)
+            {
+                MessageBox.Show("Tidak ada data untuk dicetak!");
+                return;
+            }
+            CetakLaporan frmCetak = new CetakLaporan(
+                dtmDari.Value,
+                dtmSampai.Value);
+            frmCetak.Show();
+            this.Hide();
+        }
     }
 }
