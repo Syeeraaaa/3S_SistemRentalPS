@@ -73,6 +73,8 @@ namespace SistemRentalPS
         // ------------------------
         private void btnTambah_Click_1(object sender, EventArgs e)
         {
+            
+
             if (string.IsNullOrWhiteSpace(txtNamaUnit.Text))
             {
                 MessageBox.Show("Nama Unit harus diisi");
@@ -97,33 +99,46 @@ namespace SistemRentalPS
                 cmbStatus.Focus();
                 return;
             }
+            SqlConnection conn = null;
+            SqlTransaction trans = null;
             try
             {
-                using (SqlConnection conn = Koneksi())
+               conn=Koneksi();
+               conn.Open();
+                trans = conn.BeginTransaction();
+                using (SqlCommand cmd = new SqlCommand("sp_InsertUnitPS", conn))
                 {
-                    conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_InsertUnitPS", conn))
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+                    cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
+                    cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
+                    cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
+
+                    int result = cmd.ExecuteNonQuery();
+
+                    SqlCommand cmdLog = new SqlCommand(@"insert into LogAktivitasSalah(aktivitas,waktu) velues (@aktivitas, getdate())", conn, trans);
+                    cmdLog.Parameters.AddWithValue("@aktivitas", "INSERT Data PS: " + txtTipePS.Text);
+                    cmdLog.ExecuteNonQuery();
+
+                    trans.Commit();
+
+                    if (result < 0)
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-                        cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
-                        cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
-                        cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-
-                        int result = cmd.ExecuteNonQuery();
-
-                        if (result < 0)
-                        {
-                            MessageBox.Show("Data Unit PS Berhasil ditambahkan");
-                            ClearForm();
-                            LoadData();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Data Gagal ditambahkan!");
-                        }
+                        MessageBox.Show("Data Unit PS Berhasil ditambahkan");
+                        ClearForm();
+                        LoadData();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Data Gagal ditambahkan!");
                     }
                 }
+            }
+            catch (SqlException ex)
+            {
+                trans.Rollback();
+                simpanLogPS("ROLLBACK INSERT: " + ex.Message);
+                MessageBox.Show(ex.Message);
             }
             catch (Exception ex)
             {
