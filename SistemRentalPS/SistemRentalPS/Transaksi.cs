@@ -111,25 +111,40 @@ namespace SistemRentalPS
 
         private void btnMulai_Click_1(object sender, EventArgs e)
         {
-            if (cmbUnit.SelectedIndex == -1)
+            try
             {
-                MessageBox.Show("Pilih Unit terlebih dahulu!");
-                return;
+                if (cmbUnit.SelectedIndex == -1)
+                {
+                    MessageBox.Show("Pilih Unit terlebih dahulu!");
+                    return;
+                }
+
+                DataRowView row = (DataRowView)cmbUnit.SelectedItem;
+                int hargaPerJam = Convert.ToInt32(row["harga_perjam"]);
+
+                TimeSpan durasi = dtSelesai.Value - dtMulai.Value;
+                int jam = (int)Math.Ceiling(durasi.TotalHours);
+                if (jam <= 0)
+                {
+                    MessageBox.Show("Jam selesai harus lebih besar dari jam mulai");
+                    return;
+                }
+                int total = jam * hargaPerJam;
+                txtTotal.Text = total.ToString();
+                MessageBox.Show("Durasi: " + jam + " jam, Total: Rp " + total);
+
+            }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("Terjadi Kesalahn: " + ex.Message);
             }
 
-            DataRowView row = (DataRowView)cmbUnit.SelectedItem;
-            int hargaPerJam = Convert.ToInt32(row["harga_perjam"]);
-
-            TimeSpan durasi = dtSelesai.Value - dtMulai.Value;
-            int jam = (int)Math.Ceiling(durasi.TotalHours);
-            if (jam <= 0)
-            {
-                MessageBox.Show("Jam selesai harus lebih besar dari jam mulai");
-                return;
-            }
-            int total = jam * hargaPerJam;
-            txtTotal.Text = total.ToString();
-            MessageBox.Show("Durasi: " + jam + " jam, Total: Rp " + total);
         }
 
         private void Transaksi_Load(object sender, EventArgs e)
@@ -156,7 +171,21 @@ namespace SistemRentalPS
 
         private void btnSelesai_Click_1(object sender, EventArgs e)
         {
-            MessageBox.Show("Total Bayar: Rp " + txtTotal.Text);
+            try
+            {
+                MessageBox.Show("Total Bayar: Rp " + txtTotal.Text);
+            }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
+            }
+
         }
 
         private void btnSimpan_Click_1(object sender, EventArgs e)
@@ -251,8 +280,9 @@ namespace SistemRentalPS
         }
         private void dgvTransaksi_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvTransaksi.SelectedRows.Count > 0)
-            {
+            if (dgvTransaksi.SelectedRows.Count == 0) return;
+            if (dgvTransaksi.Columns["Nama Pelanggan"] == null) return;
+            
                 DataGridViewRow row = dgvTransaksi.SelectedRows[0];
 
                 selectedId = row.Cells["id_transaksi"].Value.ToString();
@@ -260,14 +290,14 @@ namespace SistemRentalPS
                 txtNoHP.Text = row.Cells["No HP"].Value.ToString();
                 dtMulai.Text = row.Cells["Jam Mulai"].Value.ToString();
                 dtSelesai.Text = row.Cells["Jam Selesai"].Value.ToString();
-                txtTotal.Text = row.Cells["Total Bayar"].Value.ToString();
+                txtTotal.Text = row.Cells["Total bayar"].Value.ToString();
 
                 string tipe = row.Cells["Tipe PS"].Value.ToString();
                 cmbTipePS.SelectedValue = tipe;
 
                 LoadComboUnit(tipe);
                 cmbUnit.Text = row.Cells["Unit"].Value.ToString();
-            }
+            
         }
         private void btnUpdate_Click(object sender, EventArgs e)
         {
@@ -336,7 +366,7 @@ namespace SistemRentalPS
             catch (Exception ex)
             {
                 simpanLog(ex.Message);
-                MessageBox.Show("Error Update: " + ex.Message);
+                MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
             }
         }
 
@@ -369,9 +399,15 @@ namespace SistemRentalPS
                 }
 
             }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Error Search: " + ex.Message);
+                simpanLog(ex.Message);
+                MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
             }
         }
 
@@ -413,6 +449,11 @@ namespace SistemRentalPS
             if (cmbTipePS.SelectedIndex == -1) return;
             string tipe = cmbTipePS.SelectedValue.ToString();
             LoadComboUnit(tipe);
+
+        }
+
+        private void dgvTransaksi_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
 
         }
     }

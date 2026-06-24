@@ -85,12 +85,17 @@ namespace SistemRentalPS
 
                 }
             }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
             catch (Exception ex)
             {
-
-                MessageBox.Show(ex.Message);
+                simpanLog(ex.Message);
+                MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
             }
-         
+
         }
 
         private void label4_Click(object sender, EventArgs e)
@@ -218,9 +223,15 @@ namespace SistemRentalPS
                     }
                 }
             }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Terjadi kesalahan: " + ex.Message);
+                simpanLog(ex.Message);
+                MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
             }
         }
 
@@ -276,6 +287,43 @@ namespace SistemRentalPS
                 dtmSampai.Value);
             frmCetak.Show();
             this.Hide();
+        }
+        private void simpanLog(string pesan)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"insert into LogError values(getdate(), @pesan)";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@pesan", pesan);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static string GetLocalIPAddress()
+        {
+            string localIP = string.Empty;
+            try
+            {
+                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        localIP = ip.ToString();
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error getting local IP address: " + ex.Message);
+            }
+            return localIP;
         }
     }
 }

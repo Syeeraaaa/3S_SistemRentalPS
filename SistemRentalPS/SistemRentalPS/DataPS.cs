@@ -147,6 +147,7 @@ namespace SistemRentalPS
             
             catch (Exception ex)
             {
+                simpanLogPS(ex.Message);
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
             }
         }
@@ -402,9 +403,15 @@ namespace SistemRentalPS
                 MessageBox.Show("Data berhasil direset");
                 LoadData();
             }
+            catch (SqlException ex)
+            {
+                simpanLogPS(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Reset gagal: " + ex.Message);
+                simpanLogPS(ex.Message);
+                MessageBox.Show("Terjadi Kesalahan: " + ex.Message);
             }
         }
 
@@ -429,9 +436,15 @@ namespace SistemRentalPS
                 }
                 LoadData();
             }
+            catch (SqlException ex)
+            {
+                simpanLogPS(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                simpanLogPS(ex.Message);
+                MessageBox.Show("Error Update: " + ex.Message);
             }
         }
 

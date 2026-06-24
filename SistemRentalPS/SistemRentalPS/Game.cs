@@ -104,7 +104,7 @@ namespace SistemRentalPS
             catch (Exception ex)
             {
                 simpanLog(ex.Message);
-                MessageBox.Show("gENERAL ERROR: "+ ex.Message);
+                MessageBox.Show("GENERAL ERROR: "+ ex.Message);
             }
         }
 
@@ -246,8 +246,14 @@ namespace SistemRentalPS
                     }
                 }
             }
+            catch (SqlException ex)
+            {
+                simpanLog(ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
             catch (Exception ex)
             {
+                simpanLog(ex.Message);
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
             }
         }
@@ -435,5 +441,6 @@ namespace SistemRentalPS
         {
 
         }
+
     }
 }

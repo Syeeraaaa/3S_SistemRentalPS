@@ -11,16 +11,16 @@ namespace SistemRentalPS
 {
     internal class DAL
     {
-        static string connectionString = "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True; Encrypt=False; TrustServerCertificate=True";
 
-        public string GetConnectionString()
+        public static string GetConnectionString()
         {
+            string connectionString = $"Data Source=DESKTOP-A1J1BDF\\SYEERA();Initial Catalog=DBAkademikADO;User ID=sa;Password=PasswordSA;";
             return connectionString;
         }
-        private SqlConnection conn = new SqlConnection(connectionString);
+        SqlConnection conn = new SqlConnection(GetConnectionString());
         public DataTable GetGame()
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(GetConnectionString()))
             {
                 if (conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -63,7 +63,7 @@ namespace SistemRentalPS
         }
         public void InsertLog(string message)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(GetConnectionString()))
             {
                 string query = "INSERT INTO LogError VALUES (GETDATE(), @pesan)";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -76,7 +76,7 @@ namespace SistemRentalPS
         }
         public DataTable GetUnitByTipe(string tipe_ps)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand("sp_GetUnitByTipe", conn);
@@ -91,7 +91,7 @@ namespace SistemRentalPS
         }
         public DataTable GetTipePS()
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(GetConnectionString()))
             {
                 conn.Open();
                 string query = "SELECT DISTINCT tipe_ps FROM UnitPS";
