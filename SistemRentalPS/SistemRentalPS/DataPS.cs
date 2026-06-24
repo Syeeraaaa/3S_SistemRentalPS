@@ -22,13 +22,9 @@ namespace SistemRentalPS
         string id_game;
         SqlDataAdapter da;
 
-        private readonly string connectionString =
-    "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True";
+       string connectionString = "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True";
 
-        private SqlConnection Koneksi()
-        {
-            return new SqlConnection(connectionString);
-        }
+        
 
         public DataPS()
         {
@@ -81,15 +77,18 @@ namespace SistemRentalPS
                 txtNamaUnit.Focus();
                 return;
             }
-            if (txtTipePS.Text == "")
+            if (!txtTipePS.Text.StartsWith("PS") ||
+                txtTipePS.Text.Length <= 2 ||
+                !txtTipePS.Text.Substring(2).All(char.IsDigit))
             {
-                MessageBox.Show("Tipe PS harus diisi");
+                MessageBox.Show("Tipe PS harus diawali PS dan diikuti angka!");
                 txtTipePS.Focus();
                 return;
             }
-            if (txtHargaJam.Text == "" || txtHargaJam.Text.Any(char.IsLetter))
+            if (string.IsNullOrWhiteSpace(txtHargaJam.Text) ||
+                !txtHargaJam.Text.All(char.IsDigit))
             {
-                MessageBox.Show("Harga/Jam harus diisi dengan Angka!!");
+                MessageBox.Show("Harga/Jam harus berupa angka!");
                 txtHargaJam.Focus();
                 return;
             }
@@ -99,47 +98,53 @@ namespace SistemRentalPS
                 cmbStatus.Focus();
                 return;
             }
-            SqlConnection conn = null;
-            SqlTransaction trans = null;
             try
             {
-               conn=Koneksi();
-               conn.Open();
-                trans = conn.BeginTransaction();
-                using (SqlCommand cmd = new SqlCommand("sp_InsertUnitPS", conn))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
-                    cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
-                    cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
-                    cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-
-                    int result = cmd.ExecuteNonQuery();
-
-                    SqlCommand cmdLog = new SqlCommand(@"insert into LogAktivitasSalah(aktivitas,waktu) velues (@aktivitas, getdate())", conn, trans);
-                    cmdLog.Parameters.AddWithValue("@aktivitas", "INSERT Data PS: " + txtTipePS.Text);
-                    cmdLog.ExecuteNonQuery();
-
-                    trans.Commit();
-
-                    if (result < 0)
+                    conn.Open();
+                    using (SqlTransaction trans = conn.BeginTransaction())
                     {
-                        MessageBox.Show("Data Unit PS Berhasil ditambahkan");
-                        ClearForm();
-                        LoadData();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data Gagal ditambahkan!");
+                        try
+                        {
+                            using (SqlCommand cmd = new SqlCommand("sp_InsertUnitPS", conn, trans))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                cmd.Parameters.AddWithValue("@nama_unit", txtNamaUnit.Text);
+                                cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
+                                cmd.Parameters.AddWithValue("@harga_perjam", int.Parse(txtHargaJam.Text));
+                                cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
+
+                                int result = cmd.ExecuteNonQuery();
+
+                                SqlCommand cmdLog = new SqlCommand(@"insert into LogAktivitas(aktivitas,waktu) values (@aktivitas, getdate())", conn, trans);
+                                cmdLog.Parameters.AddWithValue("@aktivitas", "INSERT Data PS: " + txtTipePS.Text);
+                                cmdLog.ExecuteNonQuery();
+
+                                trans.Commit();
+
+                                if (result < 0)
+                                {
+                                    MessageBox.Show("Data Unit PS Berhasil ditambahkan");
+                                    ClearForm();
+                                    LoadData();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Data Gagal ditambahkan!");
+                                }
+                            }
+                        }
+                        catch (SqlException ex)
+                        {
+                            trans.Rollback();
+                            simpanLogPS("ROLLBACK INSERT: " + ex.Message);
+                            MessageBox.Show(ex.Message);
+                        }
                     }
                 }
             }
-            catch (SqlException ex)
-            {
-                trans.Rollback();
-                simpanLogPS("ROLLBACK INSERT: " + ex.Message);
-                MessageBox.Show(ex.Message);
-            }
+            
             catch (Exception ex)
             {
                 MessageBox.Show("Terjadi kesalahan: " + ex.Message);
@@ -160,9 +165,12 @@ namespace SistemRentalPS
                 MessageBox.Show("Nama Unit harus diisi!");
                 return;
             }
-            if (string.IsNullOrWhiteSpace(txtTipePS.Text))
+            if (!txtTipePS.Text.StartsWith("PS") ||
+                txtTipePS.Text.Length <= 2 ||
+                !txtTipePS.Text.Substring(2).All(char.IsDigit))
             {
-                MessageBox.Show("Tipe PS harus diisi!");
+                MessageBox.Show("Tipe PS harus diawali PS dan diikuti angka!");
+                txtTipePS.Focus();
                 return;
             }
             if (string.IsNullOrWhiteSpace(txtHargaJam.Text) || txtHargaJam.Text.Any(char.IsLetter))
@@ -177,9 +185,9 @@ namespace SistemRentalPS
             }
             try
             {
-                using (SqlConnection conn = Koneksi())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    
+
                     conn.Open();
 
                     using (SqlCommand cmd = new SqlCommand("sp_UpdateUnitPS", conn))
@@ -190,7 +198,7 @@ namespace SistemRentalPS
                         cmd.Parameters.AddWithValue("@tipe_ps", txtTipePS.Text);
                         cmd.Parameters.AddWithValue("@harga_perjam", txtHargaJam.Text);
                         cmd.Parameters.AddWithValue("@status", cmbStatus.Text);
-                       
+
 
                         int result = cmd.ExecuteNonQuery();
 
@@ -237,7 +245,7 @@ namespace SistemRentalPS
             {
                 try
                 {
-                    using (SqlConnection conn = Koneksi())
+                    using (SqlConnection conn = new SqlConnection(connectionString))
                     {
                         conn.Open();
 
@@ -325,8 +333,9 @@ namespace SistemRentalPS
 
         private void LoadData()
         {
-            using (SqlConnection conn = Koneksi())
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                conn.Open();
                 using (SqlCommand cmd = new SqlCommand("sp_GetUnit", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -346,6 +355,7 @@ namespace SistemRentalPS
                     }
                 }
             }
+            
         }
 
         private void BindControls()
@@ -365,7 +375,7 @@ namespace SistemRentalPS
         {
             try
             {
-                using (SqlConnection conn = Koneksi())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
 
@@ -402,7 +412,7 @@ namespace SistemRentalPS
         {
             try
             {
-                using (SqlConnection conn = Koneksi())
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     
 
@@ -436,6 +446,7 @@ namespace SistemRentalPS
             frmGame.Show();
             this.Hide();
         }
+        
     }
 }
 

@@ -4,13 +4,16 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ExcelDataReader;
 
 namespace SistemRentalPS
 {
+    
     public partial class Game : Form
     {
         private BindingSource bindingSource = new BindingSource(); 
@@ -25,6 +28,8 @@ namespace SistemRentalPS
         private readonly string connectionString =
     "Data Source=DESKTOP-A1J1BDF\\SYEERA; Initial Catalog=SistemRental_PS; Integrated Security=True";
 
+        DAL dbLogic = new DAL();
+
         private SqlConnection Koneksi()
         {
             return new SqlConnection(connectionString);
@@ -36,38 +41,9 @@ namespace SistemRentalPS
 
         private void simpanLog(string pesan)
         {
-            using (SqlConnection conn = Koneksi())
-            {
-                string query = @"insert into LogError values(GETDATE(), @pesan)";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@pesan", pesan);
-                    conn.Open();
-                    cmd.ExecuteNonQuery();
-                }
-
-            }
+            dbLogic.InsertLog(pesan);
             
         }
-        private void dgvGamee_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = dgvGamee.Rows[e.RowIndex];
-
-                id_game = row.Cells["id_game"].Value.ToString();
-                cmb_Tipe_PS.SelectedValue = row.Cells["Tipe PS"].Value.ToString();
-                if (cmbPilihUnit.DataSource != null)
-                {
-                    cmbPilihUnit.SelectedValue = row.Cells["id_unit"].Value;
-                }
-                txtNamaGame.Text = row.Cells["Nama Game"].Value.ToString();
-                cmbGenre.Text = row.Cells["Genre"].Value.ToString();
-
-            }
-        }
-
-
         private void btnTambahGame_Click(object sender, EventArgs e)
         {
             if (cmb_Tipe_PS.SelectedIndex == -1)
@@ -302,6 +278,7 @@ namespace SistemRentalPS
             cmbGenre.SelectedIndex = -1;
         }
 
+
         private void Game_Load(object sender, EventArgs e)
         {
             dgvGamee.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -350,6 +327,113 @@ namespace SistemRentalPS
             Dashboardcs fdashboard = new Dashboardcs();
             fdashboard.Show();
             this.Hide();
+        }
+
+        private void kelolaDataPSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DataPS frmDataPS = new DataPS();
+            frmDataPS.Show();
+            this.Hide();
+        }
+
+        
+        private void dgvGamee_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvGamee.Rows[e.RowIndex];
+
+                id_game = row.Cells[0].Value.ToString();
+                cmbPilihUnit.Text = row.Cells["Nama Unit"].Value.ToString();
+                cmb_Tipe_PS.Text = row.Cells["Tipe PS"].Value.ToString();
+                txtNamaGame.Text = row.Cells["Nama Game"].Value.ToString();
+                cmbGenre.Text = row.Cells["Genre"].Value.ToString();
+
+            }
+        }
+
+        private void btnExcel_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog { Filter = "Excel Workbook|*.xlsx" })
+            {
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    string filepath = ofd.FileName;
+
+                    using (var stream = System.IO.File.Open(filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                    {
+                        using (var reader = ExcelReaderFactory.CreateReader(stream))
+                        {
+                            var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                            {
+                                ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                                {
+                                    UseHeaderRow = true
+                                }
+                            });
+                            DataTable dt = result.Tables[0];
+                            dgvGamee.DataSource = dt;
+
+                            btnDataBase.Enabled = true;
+                            btnTambahGame.Enabled = false;
+                            btnUpdateGame.Enabled = false;
+                            btnHapusGame.Enabled = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void btnDataBase_Click(object sender, EventArgs e)
+        {
+            DataTable dt = dgvGamee.DataSource as DataTable;
+            if (dt == null || dt.Rows.Count == 0)
+            {
+                MessageBox.Show("Tidak ada data untuk diimportkan. Klik import dari Excel dulu ya!");
+                return;
+            }
+            int sukses = 0;
+            try
+            {
+                foreach (DataRow row in dt.Rows)
+                {
+                    string namaGame = row["Nama Game"].ToString().Trim();
+                    string genre = row["genre"].ToString().Trim();
+                    string idUnitStr = row["id_unit"].ToString().Trim();
+
+                    if (string.IsNullOrEmpty(namaGame) || string.IsNullOrEmpty(idUnitStr))
+                        continue;
+
+                    if (!int.TryParse(idUnitStr, out int id_unit))
+                        continue;
+
+                    dbLogic.InsertGame(id_unit, namaGame, genre);
+                    sukses++;
+                }
+                MessageBox.Show("Data game berhasil ditambahkan");
+
+                btnTambahGame.Enabled = true;
+                btnUpdateGame.Enabled = true;
+                btnHapusGame.Enabled = true;
+                btnDataBase.Enabled = false;
+
+                btnTampilGame.PerformClick();
+            }
+            catch (SqlException ex)
+            {
+                dbLogic.InsertLog("SQL ERROR Imprt Game: " + ex.Message);
+                MessageBox.Show("SQL ERROR: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                dbLogic.InsertLog("GENERAL ERROR Import Game: " + ex.Message);
+                MessageBox.Show("Error: " + ex.Message);
+            }
+        }
+
+        private void dgvGamee_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

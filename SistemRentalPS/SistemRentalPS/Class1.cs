@@ -8,12 +8,13 @@ namespace SistemRentalPS
 {
     internal class Class1
     {
-        public string Nama { get; set;}
-        public string nama_unit { get; set; }
-        public string tipe_ps { get; set; }
-        public DateTime tanggal { get; set; }
-        public string jam_mulai { get; set; }
-        public string jam_selesai { get; set; }
-        public decimal total_bayar { get; set; }
+        public string NamaPelanggan { get; set;}
+        public string NoHP { get; set; }
+        public string TipePS { get; set; }
+        public string Unit { get; set; }
+        public DateTime Tanggal { get; set; }
+        public string JamMulai { get; set; }
+        public string JamSelesai { get; set; }
+        public decimal TotalBayar { get; set; }
     }
 }

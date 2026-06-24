@@ -1,6 +1,7 @@
 ﻿using SistemRentalPS;
 using System;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
@@ -185,66 +186,68 @@ namespace SistemRentalPS
               MessageBox.Show("Klik tombol Mulai untuk menghitung");
               return;
           }
-           
-            SqlTransaction trans = conn.BeginTransaction();
-            try
-             {
-                 using (SqlConnection conn = new SqlConnection(connString))
-                 {
-                         conn.Open();
-                    
-
-                     int id_unit = (int)cmbUnit.SelectedValue;
-
-                     using (SqlCommand cmdT = new SqlCommand("sp_InsertTransaksi", conn))
-                     {
-                         cmdT.CommandType = CommandType.StoredProcedure;
-                         cmdT.Parameters.AddWithValue("@nama", txtNama.Text);
-                         cmdT.Parameters.AddWithValue("@nohp", txtNoHP.Text);
-                         cmdT.Parameters.AddWithValue("@id_unit", id_unit);
-                        cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
-                         cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
-                         cmdT.Parameters.AddWithValue("@total_bayar",int.Parse(txtTotal.Text));
-                         cmdT.ExecuteNonQuery();
-
-                        
-                     }
-                    SqlCommand cmdLog = new SqlCommand(
-                           @"insert into LogAktivitasSalah (aktivitas, waktu) values (@aktivitas, GETDATE())", conn, trans);
-
-                    cmdLog.Parameters.AddWithValue("@aktivitas", "INSERT TRANSAKSI: " + txtNama.Text);
-                    cmdLog.ExecuteNonQuery();
-
-                    trans.Commit();
-
-                    MessageBox.Show("Data berhasil disimpan!");
-                     txtNama.Text = "";
-                     txtNoHP.Text = "";
-                     txtTotal.Text = "";
-                    cmbTipePS.SelectedIndex = -1;
-                     cmbUnit.SelectedIndex = -1;
-                     
-                     LoadComboTipe();
-                     LoadData();
-                 }
-             }
-            catch (SqlException ex)
+            using (SqlConnection conn = new SqlConnection(connString))
             {
-                trans.Rollback();
+                conn.Open();
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        int id_unit = (int)cmbUnit.SelectedValue;
 
-                simpanLog("ROLLBACK INSERT : "+ ex.Message);
-                MessageBox.Show("SQL ERROR : "+ex.Message);
+                        using (SqlCommand cmdT = new SqlCommand("sp_InsertTransaksi", conn,trans))
+                        {
+                            cmdT.CommandType = CommandType.StoredProcedure;
+                            cmdT.Parameters.AddWithValue("@nama", txtNama.Text);
+                            cmdT.Parameters.AddWithValue("@nohp", txtNoHP.Text);
+                            cmdT.Parameters.AddWithValue("@id_unit", id_unit);
+                            cmdT.Parameters.AddWithValue("@jam_mulai", dtMulai.Value);
+                            cmdT.Parameters.AddWithValue("@jam_selesai", dtSelesai.Value);
+                            cmdT.Parameters.AddWithValue("@total_bayar", int.Parse(txtTotal.Text));
+                            cmdT.ExecuteNonQuery();
+
+
+                        }
+                        SqlCommand cmdLog = new SqlCommand(
+                               @"insert into LogAktivitas (aktivitas, waktu) values (@aktivitas, GETDATE())", conn, trans);
+
+                        cmdLog.Parameters.AddWithValue("@aktivitas", "INSERT TRANSAKSI: " + txtNama.Text);
+                        cmdLog.ExecuteNonQuery();
+
+                        trans.Commit();
+
+                        MessageBox.Show("Data berhasil disimpan!");
+                        txtNama.Text = "";
+                        txtNoHP.Text = "";
+                        txtTotal.Text = "";
+                        cmbTipePS.SelectedIndex = -1;
+                        cmbUnit.SelectedIndex = -1;
+
+                        LoadComboTipe();
+                        LoadData();
+                    }
+                    catch (SqlException ex)
+                    {
+                        trans.Rollback();
+
+                        simpanLog("ROLLBACK INSERT : " + ex.Message);
+                        MessageBox.Show("SQL ERROR : " + ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        trans.Rollback();
+                        simpanLog("GENERAL ERROR: " + ex.Message);
+                        MessageBox.Show("ERROR SIMPAN: " + ex.Message);
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+
+                }
             }
-            catch (Exception ex)
-            {
-                trans.Rollback();
-                simpanLog("GENERAL ERROR: "+ex.Message);
-                MessageBox.Show("ERROR SIMPAN: "+ex.Message);
-            }
-            finally
-            {
-                conn.Close();
-            }
+
+
         }
         private void dgvTransaksi_SelectionChanged(object sender, EventArgs e)
         {
