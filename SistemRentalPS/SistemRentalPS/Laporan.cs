@@ -32,6 +32,12 @@ namespace SistemRentalPS
 
         private void btnTampil_Click(object sender, EventArgs e)
         {
+            if (dtmSampai.Value.Date < dtmDari.Value.Date)
+            {
+                MessageBox.Show("Tanggal 'Sampai' harus lebih besar dari tanggal 'Dari'!!", "Validasi Tanggal", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                dtmSampai.Focus();
+                return;
+            }
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -241,7 +247,7 @@ namespace SistemRentalPS
                         return;
 
                     }
-                    btnCetak.Enabled = false;
+                    btnCetak.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -264,11 +270,7 @@ namespace SistemRentalPS
 
         private void btnCetak_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.Rows.Count == 0)
-            {
-                MessageBox.Show("Tidak ada data untuk dicetak!");
-                return;
-            }
+            
             CetakLaporan frmCetak = new CetakLaporan(
                 dtmDari.Value,
                 dtmSampai.Value);
