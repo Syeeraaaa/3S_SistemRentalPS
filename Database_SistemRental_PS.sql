@@ -573,4 +573,68 @@ GO
 
 select * from Transaksi
 
+alter PROCEDURE sp_UpdateUnitPS
+	@id_unit INT,
+	@nama_unit VARCHAR(100),
+	@tipe_ps VARCHAR(100),
+	@harga_perjam INT,
+	@status VARCHAR(50)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF @nama_unit NOT LIKE 'Unit-%'
+       OR ISNUMERIC(REPLACE(@nama_unit, 'Unit-', '')) = 0
+    BEGIN
+        RAISERROR('Format nama unit harus Unit-angka', 16, 1);
+        RETURN;
+    END
 
+	IF @tipe_ps NOT LIKE 'PS%'
+       OR ISNUMERIC(REPLACE(@tipe_ps, 'PS', '')) = 0
+    BEGIN
+        RAISERROR('Format tipe PS harus PS diikuti angka', 16, 1);
+        RETURN;
+    END
+
+	IF ISNUMERIC(@harga_perjam) = 0 OR CAST(@harga_perjam AS INT) <= 0
+    BEGIN
+        RAISERROR('Harga per jam harus berupa angka positif tanpa simbol', 16, 1);
+        RETURN;
+    END
+
+	UPDATE UnitPS
+    SET nama_unit = @nama_unit,
+        tipe_ps = @tipe_ps,
+        harga_perjam = @harga_perjam,
+        status = @status
+     WHERE id_unit = @id_unit
+END
+
+alter PROCEDURE sp_InsertUnitPS
+	@nama_unit VARCHAR(100),
+	@tipe_ps VARCHAR(100),
+	@harga_perjam INT,
+	@status VARCHAR(50)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF @nama_unit NOT LIKE 'Unit-%'
+		OR ISNUMERIC(REPLACE(@nama_unit, 'Unit-', '')) = 0
+	BEGIN
+		RAISERROR('Format nama unit harus diisi Unit-angka', 16,1);
+		RETURN;
+	END
+	if exists (select 1 from UnitPS where nama_unit = @nama_unit)
+	begin
+		Raiserror('Nama Unit "%s" sudah terdaftar!', 16, 1, @nama_unit);
+		return;
+	end
+
+	insert into UnitPS (nama_unit,tipe_ps,harga_perjam,status)
+	values (@nama_unit, @tipe_ps, @harga_perjam, @status)
+END
+
+select * from LogAktivitas;
+select * from LogError
+
+select*from vwTransaksi
