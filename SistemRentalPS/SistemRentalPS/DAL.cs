@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SistemRentalPS
 {
@@ -14,7 +15,7 @@ namespace SistemRentalPS
 
         public static string GetConnectionString()
         {
-            string connectionString = $"Data Source=DESKTOP-A1J1BDF\\SYEERA();Initial Catalog=DBAkademikADO;User ID=sa;Password=PasswordSA;";
+            string connectionString = $"Data Source={GetLocalIPAddress()};Initial Catalog=SistemRental_PS;User ID=sa;Password=123;";
             return connectionString;
         }
         SqlConnection conn = new SqlConnection(GetConnectionString());
@@ -100,6 +101,27 @@ namespace SistemRentalPS
                 da.Fill(dt);
                 return dt;
             }
+        }
+        public static string GetLocalIPAddress()
+        {
+            string localIP = string.Empty;
+            try
+            {
+                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        localIP = ip.ToString();
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error getting local IP address: " + ex.Message);
+            }
+            return localIP;
         }
     }
 }

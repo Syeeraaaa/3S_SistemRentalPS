@@ -200,7 +200,7 @@ namespace SistemRentalPS
 
                             int result = cmd.ExecuteNonQuery();
 
-                            if (result > 0)
+                            if (result < 0)
                             {
                                 MessageBox.Show("Data Unit PS berhasil dihapus");
                                 ClearForm();

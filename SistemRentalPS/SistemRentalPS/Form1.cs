@@ -15,6 +15,7 @@ namespace SistemRentalPS
     {
         SqlConnection conn;
         SqlCommand cmd;
+        DAL dbLogic = new DAL();
 
         private void Koneksi()
         {
